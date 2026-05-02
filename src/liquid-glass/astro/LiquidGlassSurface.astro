@@ -1,0 +1,54 @@
+---
+import "../core/liquid-glass.css";
+import { liquidGlassPropsToAttributes } from "../core/attributes.js";
+import type { LiquidGlassProps } from "../core/types.js";
+
+export interface Props extends LiquidGlassProps {
+	/** CSS class applied to the custom element host. */
+	class?: string;
+}
+
+const {
+	class: className,
+	id,
+	shape,
+	radius,
+	bezel,
+	scale,
+	activeEdges,
+	specularHighlight,
+	fillRefraction,
+	interiorLens,
+	deformationX,
+	deformationY,
+	frosted,
+	frostedTint,
+} = Astro.props;
+
+const attributes = liquidGlassPropsToAttributes({
+	id,
+	shape,
+	radius,
+	bezel,
+	scale,
+	activeEdges,
+	specularHighlight,
+	fillRefraction,
+	interiorLens,
+	deformationX,
+	deformationY,
+	frosted,
+	frostedTint,
+});
+---
+
+<liquid-glass-surface {...attributes} class={className}></liquid-glass-surface>
+
+<script>
+	import { defineLiquidGlassElement } from "../core/define-element.js";
+
+	defineLiquidGlassElement();
+	document.addEventListener("astro:page-load", () => {
+		defineLiquidGlassElement();
+	});
+</script>

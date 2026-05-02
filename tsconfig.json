@@ -1,0 +1,21 @@
+{
+	"compilerOptions": {
+		"target": "ES2022",
+		"lib": ["DOM", "DOM.Iterable", "ES2022"],
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"strict": true,
+		"jsx": "react-jsx",
+		"jsxImportSource": "react",
+		"declaration": true,
+		"declarationMap": true,
+		"sourceMap": false,
+		"allowArbitraryExtensions": true,
+		"isolatedModules": true,
+		"verbatimModuleSyntax": true,
+		"skipLibCheck": true,
+		"noEmit": true
+	},
+	"include": ["src", "scripts", "vitest.config.ts"],
+	"exclude": ["dist", "node_modules", "examples"]
+}

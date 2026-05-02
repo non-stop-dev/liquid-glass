@@ -1,0 +1,74 @@
+{
+	"name": "@rawr-labs/visual-components",
+	"version": "0.1.0",
+	"description": "Framework-agnostic Rawr Labs visual components with thin Astro and React wrappers.",
+	"license": "MIT",
+	"type": "module",
+	"private": false,
+	"sideEffects": [
+		"**/*.css",
+		"dist/liquid-glass/index.js",
+		"dist/liquid-glass/core/define-element.js",
+		"dist/liquid-glass/react/*.js",
+		"dist/liquid-glass/astro/*.astro"
+	],
+	"files": [
+		"dist",
+		"README.md",
+		"LICENSE",
+		".agents"
+	],
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		},
+		"./liquid-glass": {
+			"types": "./dist/liquid-glass/index.d.ts",
+			"default": "./dist/liquid-glass/index.js"
+		},
+		"./astro": {
+			"types": "./dist/liquid-glass/astro/index.d.ts",
+			"default": "./dist/liquid-glass/astro/index.js"
+		},
+		"./react": {
+			"types": "./dist/liquid-glass/react/index.d.ts",
+			"default": "./dist/liquid-glass/react/index.js"
+		},
+		"./styles.css": "./dist/liquid-glass/core/liquid-glass.css"
+	},
+	"scripts": {
+		"build": "tsc -p tsconfig.build.json && node scripts/copy-static.mjs",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run",
+		"dev:astro": "pnpm -C examples/astro dev",
+		"dev:react": "pnpm -C examples/react dev",
+		"build:examples": "pnpm -C examples/astro build && pnpm -C examples/react build"
+	},
+	"peerDependencies": {
+		"astro": ">=5 <7",
+		"react": ">=18 <20"
+	},
+	"peerDependenciesMeta": {
+		"astro": {
+			"optional": true
+		},
+		"react": {
+			"optional": true
+		}
+	},
+	"devDependencies": {
+		"@astrojs/react": "5.0.4",
+		"@types/node": "24.9.1",
+		"@types/react": "19.2.2",
+		"@types/react-dom": "19.2.2",
+		"@vitejs/plugin-react": "^5.0.0",
+		"astro": "6.2.1",
+		"jsdom": "^27.0.0",
+		"react": "19.2.0",
+		"react-dom": "19.2.0",
+		"typescript": "^5.9.3",
+		"vite": "^7.1.0",
+		"vitest": "^4.0.0"
+	}
+}
