@@ -35,6 +35,8 @@ describe("liquid glass custom element contract", () => {
 			"fisheye" + "StrengthX",
 			"fisheye" + "StrengthY",
 			"fe" + "Turbulence",
+			"box-shadow",
+			"backgroundImage",
 		];
 
 		for (const term of blockedTerms) {
@@ -43,5 +45,10 @@ describe("liquid glass custom element contract", () => {
 
 		expect(implementation).toContain("backdrop-filter");
 		expect(implementation).toContain("feDisplacementMap");
+		expect(implementation).toContain("--liquid-glass-specular-mask");
+		expect(implementation).toContain("mask-image");
+		expect(implementation).toContain("-webkit-mask-image");
+		expect(implementation).toContain("liquid-glass-specular-sweep");
+		expect(implementation).toContain("prefers-reduced-motion");
 	});
 });

@@ -327,7 +327,7 @@ Result:
 
 - Highlight follows the actual lens geometry.
 - Brightness changes with normal angle relative to the fixed light direction.
-- Highlight can be disabled with `specularHighlight="none"`.
+- Highlight can be disabled with `specularHighlight={false}` or `specular-highlight="false"`.
 
 Avoid:
 
@@ -388,7 +388,7 @@ Public numeric controls use a normalized `0-10` scale and are rounded to one dec
 
 `activeEdges`: `"all"`, `"none"`, or selected edges. Use `"all"` for normal glass. Use one edge for border-only effects.
 
-`specularHighlight`: `"all"`, `"none"`, or selected edges for the normal-based shine layer. Use `"none"` when highlights distract from backdrop refraction.
+`specularHighlight`: `true` or `false` for the normal-based shine layer. Use `false` when highlights distract from backdrop refraction.
 
 `fillRefraction`: `false` for bezel-only refraction; `true` for one filled convex lens.
 

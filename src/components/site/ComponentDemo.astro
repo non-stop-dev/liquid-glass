@@ -18,9 +18,10 @@ const hostClass = isButton
 		? "relative min-h-64 overflow-hidden rounded-2xl"
 		: "relative h-18 overflow-hidden rounded-full";
 const radius = isButton ? 10 : "capsule";
-const bezel = variant === "card" ? 2 : 1;
-const scale = variant === "card" ? 3.2 : 4.3;
-const specularHighlight = variant === "card" ? "all" : "none";
+const bezel = 0.5;
+const scale = 1;
+const frosted = 4;
+const specularHighlight = false;
 const deformationY = variant === "nav" ? 3 : 2;
 const backgroundImages = [
 	"/backgrounds-for-components/pexels-alexant-7004739.jpg",
@@ -77,12 +78,12 @@ const propRows = [
 	["bezel", String(bezel)],
 	["scale", String(scale)],
 	["activeEdges", `"all"`],
-	["specularHighlight", `"${specularHighlight}"`],
+	["specularHighlight", String(specularHighlight)],
 	["fillRefraction", "true"],
 	["interiorLens", `"fisheye"`],
 	["deformationX", "3"],
 	["deformationY", String(deformationY)],
-	["frosted", "4"],
+	["frosted", String(frosted)],
 	["frostedTint", `"white"`],
 ] as const;
 const htmlAttributes = `id="${id}"
@@ -97,7 +98,7 @@ const htmlAttributes = `id="${id}"
     interior-lens="fisheye"
     deformation-x="3"
     deformation-y="${deformationY}"
-    frosted="4"
+    frosted="${frosted}"
     frosted-tint="white"`;
 const astroProps = `id="${id}"
     class="absolute inset-0"
@@ -106,12 +107,12 @@ const astroProps = `id="${id}"
     bezel={${bezel}}
     scale={${scale}}
     activeEdges="all"
-    specularHighlight="${specularHighlight}"
+    specularHighlight={${specularHighlight}}
     fillRefraction
     interiorLens="fisheye"
     deformationX={3}
     deformationY={${deformationY}}
-    frosted={4}
+    frosted={${frosted}}
     frostedTint="white"`;
 const reactProps = `id="${id}"
         className="absolute inset-0"
@@ -120,12 +121,12 @@ const reactProps = `id="${id}"
         bezel={${bezel}}
         scale={${scale}}
         activeEdges="all"
-        specularHighlight="${specularHighlight}"
+        specularHighlight={${specularHighlight}}
         fillRefraction
         interiorLens="fisheye"
         deformationX={3}
         deformationY={${deformationY}}
-        frosted={4}
+        frosted={${frosted}}
         frostedTint="white"`;
 const codeExamples = [
 	{
@@ -250,7 +251,10 @@ export function ${variant === "nav" ? "NavigationSurface" : variant === "card" ?
 <section
 	class="w-full min-w-0 overflow-hidden rounded-lg border border-white/10 bg-white/[0.03] p-4"
 	data-component-demo={id}
-	data-glass-finish="4"
+	data-glass-bezel={bezel}
+	data-glass-frosted={frosted}
+	data-glass-scale={scale}
+	data-glass-specular-highlight={String(specularHighlight)}
 	data-glass-tint="white"
 	data-glass-lens="fisheye"
 	style="contain: inline-size;"
@@ -318,7 +322,7 @@ export function ${variant === "nav" ? "NavigationSurface" : variant === "card" ?
 					interiorLens="fisheye"
 					deformationX={3}
 					deformationY={deformationY}
-					frosted={4}
+					frosted={frosted}
 					frostedTint="white"
 				/>
 				<div class={contentClass}>
@@ -337,74 +341,138 @@ export function ${variant === "nav" ? "NavigationSurface" : variant === "card" ?
 			</div>
 		</div>
 		<div
-			class="mt-3 flex flex-wrap gap-2"
+			class="glass-demo-controls-panel mt-3"
 			aria-label={`${title} liquid glass controls`}
 		>
-			<div class="glass-demo-segment" role="group" aria-label="Crystal finish">
-				<button
-					type="button"
-					class="glass-demo-control focus-ring"
-					aria-pressed="false"
-					data-glass-control="finish"
-					data-glass-attribute="frosted"
-					data-glass-value="0"
-				>
-					Polished
-				</button>
-				<button
-					type="button"
-					class="glass-demo-control focus-ring"
-					aria-pressed="true"
-					data-glass-control="finish"
-					data-glass-attribute="frosted"
-					data-glass-value="4"
-				>
-					Frosted
-				</button>
+			<div class="grid min-w-0 gap-3 md:grid-cols-3">
+				<label class="glass-demo-range">
+					<span class="glass-demo-range-label">
+						<span>Bezel</span>
+						<output data-glass-output="bezel">{bezel}</output>
+					</span>
+					<input
+						type="range"
+						min="0"
+						max="10"
+						step="0.1"
+						value={bezel}
+						style={`--glass-range-value: ${bezel * 10}%`}
+						aria-label="Bezel"
+						data-glass-range="bezel"
+						data-glass-attribute="bezel"
+					/>
+				</label>
+				<label class="glass-demo-range">
+					<span class="glass-demo-range-label">
+						<span>Frosted</span>
+						<output data-glass-output="frosted">{frosted}</output>
+					</span>
+					<input
+						type="range"
+						min="0"
+						max="10"
+						step="0.1"
+						value={frosted}
+						style={`--glass-range-value: ${frosted * 10}%`}
+						aria-label="Frosted"
+						data-glass-range="frosted"
+						data-glass-attribute="frosted"
+					/>
+				</label>
+				<label class="glass-demo-range">
+					<span class="glass-demo-range-label">
+						<span>Scale</span>
+						<output data-glass-output="scale">{scale}</output>
+					</span>
+					<input
+						type="range"
+						min="0"
+						max="10"
+						step="0.1"
+						value={scale}
+						style={`--glass-range-value: ${scale * 10}%`}
+						aria-label="Scale"
+						data-glass-range="scale"
+						data-glass-attribute="scale"
+					/>
+				</label>
 			</div>
-			<div class="glass-demo-segment" role="group" aria-label="Frosted tint">
-				<button
-					type="button"
-					class="glass-demo-control focus-ring"
-					aria-pressed="true"
-					data-glass-control="tint"
-					data-glass-attribute="frosted-tint"
-					data-glass-value="white"
-				>
-					White
-				</button>
-				<button
-					type="button"
-					class="glass-demo-control focus-ring"
-					aria-pressed="false"
-					data-glass-control="tint"
-					data-glass-attribute="frosted-tint"
-					data-glass-value="black"
-				>
-					Black
-				</button>
-			</div>
-			<div class="glass-demo-segment" role="group" aria-label="Interior lens">
-				<button
-					type="button"
-					class="glass-demo-control focus-ring"
-					aria-pressed="false"
-					data-glass-control="lens"
-					data-glass-attribute="interior-lens"
-					data-glass-value="linear"
-				>
-					Linear
-				</button>
-				<button
-					type="button"
-					class="glass-demo-control focus-ring"
-					aria-pressed="true"
-					data-glass-control="lens"
-					data-glass-attribute="interior-lens"
-					data-glass-value="fisheye"
-				>
-					Fisheye
-				</button>
+			<div class="glass-demo-switches">
+				<div class="glass-demo-switch">
+					<span class="glass-demo-switch-label">Tint</span>
+					<div class="glass-demo-segment" role="group" aria-label="Frosted tint">
+						<button
+							type="button"
+							class="glass-demo-control focus-ring"
+							aria-pressed="true"
+							data-glass-control="tint"
+							data-glass-attribute="frosted-tint"
+							data-glass-value="white"
+						>
+							White
+						</button>
+						<button
+							type="button"
+							class="glass-demo-control focus-ring"
+							aria-pressed="false"
+							data-glass-control="tint"
+							data-glass-attribute="frosted-tint"
+							data-glass-value="black"
+						>
+							Black
+						</button>
+					</div>
+				</div>
+				<div class="glass-demo-switch">
+					<span class="glass-demo-switch-label">Specular Highlight</span>
+					<div class="glass-demo-segment" role="group" aria-label="Specular highlight">
+						<button
+							type="button"
+							class="glass-demo-control focus-ring"
+							aria-pressed="true"
+							data-glass-control="specularHighlight"
+							data-glass-attribute="specular-highlight"
+							data-glass-value="false"
+						>
+							False
+						</button>
+						<button
+							type="button"
+							class="glass-demo-control focus-ring"
+							aria-pressed="false"
+							data-glass-control="specularHighlight"
+							data-glass-attribute="specular-highlight"
+							data-glass-value="true"
+						>
+							True
+						</button>
+					</div>
+				</div>
+				<div class="glass-demo-switch">
+					<span class="glass-demo-switch-label">Interior Lens</span>
+					<div class="glass-demo-segment" role="group" aria-label="Interior lens">
+						<button
+							type="button"
+							class="glass-demo-control focus-ring"
+							aria-pressed="false"
+							data-glass-control="lens"
+							data-glass-attribute="interior-lens"
+							data-glass-value="linear"
+						>
+							Linear
+						</button>
+						<button
+							type="button"
+							class="glass-demo-control focus-ring"
+							aria-pressed="true"
+							data-glass-control="lens"
+							data-glass-attribute="interior-lens"
+							data-glass-value="fisheye"
+						>
+							Fisheye
+						</button>
+					</div>
+				</div>
 			</div>
 		</div>
 		<div class="mt-4 min-w-0" style="contain: inline-size;">
@@ -468,21 +536,39 @@ export function ${variant === "nav" ? "NavigationSurface" : variant === "card" ?
 	if (!dragWindow.rawrGlassControlsReadyV3) {
 		dragWindow.rawrGlassControlsReadyV3 = true;
 
+		const normalizeControl = (value: string) => {
+			const numericValue = Number(value);
+			const clampedValue = Math.max(0, Math.min(10, numericValue));
+			return String(Math.round(clampedValue * 10) / 10);
+		};
+
 		const syncCodeExamples = (demo: HTMLElement) => {
-			const finish = demo.dataset.glassFinish ?? "4";
+			const bezel = demo.dataset.glassBezel ?? "0.5";
+			const frosted = demo.dataset.glassFrosted ?? "4";
+			const scale = demo.dataset.glassScale ?? "1";
+			const specularHighlight = demo.dataset.glassSpecularHighlight ?? "false";
 			const tint = demo.dataset.glassTint ?? "white";
 			const lens = demo.dataset.glassLens ?? "fisheye";
 
 			demo.querySelectorAll<HTMLElement>("[role='tabpanel'] code").forEach((code) => {
 				const current = code.textContent ?? "";
 				const updated = current
-					.replaceAll(/frosted="[^"]*"/g, `frosted="${finish}"`)
+					.replaceAll(/bezel="[^"]*"/g, `bezel="${bezel}"`)
+					.replaceAll(/scale="[^"]*"/g, `scale="${scale}"`)
+					.replaceAll(/specular-highlight="[^"]*"/g, `specular-highlight="${specularHighlight}"`)
+					.replaceAll(/frosted="[^"]*"/g, `frosted="${frosted}"`)
 					.replaceAll(/frosted-tint="[^"]*"/g, `frosted-tint="${tint}"`)
 					.replaceAll(/interior-lens="[^"]*"/g, `interior-lens="${lens}"`)
-					.replaceAll(/frosted=\{[^}]*\}/g, `frosted={${finish}}`)
+					.replaceAll(/bezel=\{[^}]*\}/g, `bezel={${bezel}}`)
+					.replaceAll(/scale=\{[^}]*\}/g, `scale={${scale}}`)
+					.replaceAll(/specularHighlight=\{[^}]*\}/g, `specularHighlight={${specularHighlight}}`)
+					.replaceAll(/frosted=\{[^}]*\}/g, `frosted={${frosted}}`)
 					.replaceAll(/frostedTint="[^"]*"/g, `frostedTint="${tint}"`)
 					.replaceAll(/interiorLens="[^"]*"/g, `interiorLens="${lens}"`)
-					.replaceAll(/frosted:\s*[\d.]+/g, `frosted: ${finish}`)
+					.replaceAll(/bezel:\s*[\d.]+/g, `bezel: ${bezel}`)
+					.replaceAll(/scale:\s*[\d.]+/g, `scale: ${scale}`)
+					.replaceAll(/specularHighlight:\s*(true|false)/g, `specularHighlight: ${specularHighlight}`)
+					.replaceAll(/frosted:\s*[\d.]+/g, `frosted: ${frosted}`)
 					.replaceAll(/frostedTint:\s*"[^"]*"/g, `frostedTint: "${tint}"`)
 					.replaceAll(/interiorLens:\s*"[^"]*"/g, `interiorLens: "${lens}"`);
 
@@ -490,6 +576,25 @@ export function ${variant === "nav" ? "NavigationSurface" : variant === "card" ?
 					code.textContent = updated;
 				}
 			});
+		};
+
+		const updateRangeControl = (range: HTMLInputElement) => {
+			const demo = range.closest<HTMLElement>("[data-component-demo]");
+			const surface = demo?.querySelector<HTMLElement>("liquid-glass-surface");
+			const key = range.dataset.glassRange;
+			const attribute = range.dataset.glassAttribute;
+			const value = normalizeControl(range.value);
+
+			if (!demo || !surface || !key || !attribute) {
+				return;
+			}
+
+			range.value = value;
+			range.style.setProperty("--glass-range-value", `${Number(value) * 10}%`);
+			demo.dataset[`glass${key[0]?.toUpperCase() ?? ""}${key.slice(1)}`] = value;
+			demo.querySelector<HTMLOutputElement>(`[data-glass-output="${key}"]`)?.replaceChildren(value);
+			surface.setAttribute(attribute, value);
+			syncCodeExamples(demo);
 		};
 
 		document.addEventListener("click", (event) => {
@@ -514,10 +619,6 @@ export function ${variant === "nav" ? "NavigationSurface" : variant === "card" ?
 				return;
 			}
 
-			if (group === "finish") {
-				demo.dataset.glassFinish = value;
-			}
-
 			if (group === "tint") {
 				demo.dataset.glassTint = value;
 			}
@@ -526,7 +627,14 @@ export function ${variant === "nav" ? "NavigationSurface" : variant === "card" ?
 				demo.dataset.glassLens = value;
 			}
 
-			surface.setAttribute("frosted", demo.dataset.glassFinish ?? "4");
+			if (group === "specularHighlight") {
+				demo.dataset.glassSpecularHighlight = value;
+			}
+
+			surface.setAttribute(
+				"specular-highlight",
+				demo.dataset.glassSpecularHighlight ?? "false",
+			);
 			surface.setAttribute("frosted-tint", demo.dataset.glassTint ?? "white");
 			surface.setAttribute("interior-lens", demo.dataset.glassLens ?? "fisheye");
 			syncCodeExamples(demo);
@@ -536,6 +644,16 @@ export function ${variant === "nav" ? "NavigationSurface" : variant === "card" ?
 				.forEach((button) => {
 					button.setAttribute("aria-pressed", String(button === control));
 				});
+		});
+
+		document.addEventListener("input", (event) => {
+			const target = event.target;
+
+			if (!(target instanceof HTMLInputElement) || !target.matches("[data-glass-range]")) {
+				return;
+			}
+
+			updateRangeControl(target);
 		});
 	}
 

@@ -6,6 +6,7 @@ import type {
 	LiquidGlassMaps,
 	LiquidGlassRadius,
 	LiquidGlassShape,
+	LiquidGlassSpecularHighlight,
 } from "./types.js";
 
 export type {
@@ -16,6 +17,7 @@ export type {
 	LiquidGlassMaps,
 	LiquidGlassRadius,
 	LiquidGlassShape,
+	LiquidGlassSpecularHighlight,
 } from "./types.js";
 
 interface FieldSample {
@@ -76,7 +78,8 @@ export function createLiquidGlassMaps(
 	const deformationY = normalizeLiquidGlassControl(options.deformationY, 1.5);
 	const bezel = resolveBezelPixels(width, height, bezelControl);
 	const activeEdges = normalizeEdges(options.activeEdges);
-	const specularHighlight = normalizeEdges(options.specularHighlight);
+	const hasSpecularHighlight = options.specularHighlight;
+	const specularHighlight = normalizeSpecularHighlight(options.specularHighlight);
 	const requestedScale = resolveRequestedScale(scaleControl);
 	const fillRefraction = options.fillRefraction === true;
 	const interiorLens = options.interiorLens ?? "linear";
@@ -91,7 +94,7 @@ export function createLiquidGlassMaps(
 		radius,
 		bezelControl,
 		activeEdges,
-		specularHighlight,
+		specularHighlight: hasSpecularHighlight,
 		scaleControl,
 		fillRefraction,
 		interiorLens,
@@ -165,11 +168,7 @@ export function createLiquidGlassMaps(
 			) {
 				const edgeProgress = sample.distanceInside / bezel;
 
-				specularAlphaField[index] = specularAlpha(
-					sample.normalX,
-					sample.normalY,
-					edgeProgress,
-				);
+				specularAlphaField[index] = specularRimAlpha(edgeProgress);
 			}
 		}
 	}
@@ -216,7 +215,7 @@ export interface LiquidGlassMapCacheKeyOptions {
 	radius: number;
 	bezelControl: number;
 	activeEdges: EdgeMask;
-	specularHighlight: EdgeMask;
+	specularHighlight: LiquidGlassSpecularHighlight;
 	scaleControl: number;
 	fillRefraction: boolean;
 	interiorLens: LiquidGlassInteriorLens;
@@ -237,7 +236,7 @@ export function createLiquidGlassMapCacheKey(
 		Math.round(options.radius * 10) / 10,
 		options.bezelControl,
 		edgeMaskKey(options.activeEdges),
-		edgeMaskKey(options.specularHighlight),
+		String(options.specularHighlight),
 		options.scaleControl,
 		options.fillRefraction ? "filled" : "bezel",
 		options.interiorLens,
@@ -461,18 +460,14 @@ function fisheyeAxis(value: number, strength: number, blend: number): number {
 	return value + (clampedValue - value) * blend;
 }
 
-function specularAlpha(normalX: number, normalY: number, progress: number): number {
+function specularRimAlpha(progress: number): number {
 	const t = Math.max(0, Math.min(progress, 1));
 	const rimBand =
 		smootherstep(0, 0.16, t) *
 		(1 - smootherstep(0.74, 1, t));
-	const lightX = -0.48;
-	const lightY = -0.88;
-	const facingLight = Math.max(0, normalX * lightX + normalY * lightY);
-	const oppositeCatch = Math.max(0, normalX * -lightX + normalY * -lightY);
-	const rimLight = 0.05 + facingLight ** 2.35 * 0.78 + oppositeCatch ** 5 * 0.1;
+	const glassLip = 0.18 + 0.82 * (1 - smootherstep(0.46, 1, t));
 
-	return Math.min(0.72, rimBand * rimLight);
+	return Math.min(0.78, rimBand * glassLip);
 }
 
 function blurField(
@@ -653,6 +648,12 @@ function normalizeEdges(edges: LiquidGlassEdges): EdgeMask {
 		bottom: selectedEdges.includes("bottom"),
 		left: selectedEdges.includes("left"),
 	};
+}
+
+function normalizeSpecularHighlight(
+	specularHighlight: LiquidGlassSpecularHighlight,
+): EdgeMask {
+	return normalizeEdges(specularHighlight ? "all" : "none");
 }
 
 function edgeMaskAllows(edges: EdgeMask, normalX: number, normalY: number): boolean {

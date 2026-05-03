@@ -31,7 +31,7 @@ Use the element as an empty visual layer. Put content in a separate layer above 
 		bezel="1"
 		scale="4.3"
 		active-edges="all"
-		specular-highlight="none"
+		specular-highlight="false"
 		fill-refraction="true"
 		interior-lens="fisheye"
 		deformation-x="3"
@@ -60,7 +60,7 @@ import { LiquidGlassSurface } from "@rawr-labs/visual-components/astro";
 		bezel={1}
 		scale={4.3}
 		activeEdges="all"
-		specularHighlight="none"
+		specularHighlight={false}
 		fillRefraction
 		interiorLens="fisheye"
 		deformationX={3}
@@ -89,7 +89,7 @@ export function NavGlass() {
 				bezel={1}
 				scale={4.3}
 				activeEdges="all"
-				specularHighlight="none"
+				specularHighlight={false}
 				fillRefraction
 				interiorLens="fisheye"
 				deformationX={3}
@@ -115,7 +115,7 @@ Numeric controls use a normalized `0-10` range. Decimals are accepted and rounde
 | `bezel` | `bezel` | number | `5` | Edge ramp width. |
 | `scale` | `scale` | number | `4` | Base displacement intensity. |
 | `activeEdges` | `active-edges` | `"all"`, `"none"`, edge, or edge list | `"all"` | Edges that participate in refraction. Edges are `top`, `right`, `bottom`, `left`. |
-| `specularHighlight` | `specular-highlight` | `"all"`, `"none"`, edge, or edge list | `"all"` | Edges that receive normal-based rim lighting. |
+| `specularHighlight` | `specular-highlight` | `true` or `false` | `true` | Enables the generated normal-based rim lighting. |
 | `fillRefraction` | `fill-refraction` | boolean | `false` | Refracts the whole surface instead of only the bezel. |
 | `interiorLens` | `interior-lens` | `"linear"` or `"fisheye"` | `"linear"` | Interior lens deformation model. |
 | `deformationX` | `deformation-x` | number | `2` | X-axis deformation strength for fisheye mode. |

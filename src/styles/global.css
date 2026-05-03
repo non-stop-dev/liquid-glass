@@ -116,6 +116,29 @@
 		transform: scale(1) rotate(0deg);
 	}
 
+	.glass-demo-switches {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		align-content: center;
+		justify-content: flex-start;
+		gap: 0.625rem;
+	}
+
+	.glass-demo-switch {
+		display: grid;
+		justify-items: center;
+		gap: 0.25rem;
+	}
+
+	.glass-demo-switch-label {
+		color: rgb(255 255 255 / 62%);
+		font-size: 0.625rem;
+		font-weight: 900;
+		line-height: 1;
+		text-transform: uppercase;
+	}
+
 	.glass-demo-segment {
 		display: flex;
 		overflow: hidden;
@@ -126,10 +149,10 @@
 	}
 
 	.glass-demo-control {
-		min-height: 2.5rem;
-		padding: 0 0.75rem;
+		min-height: 1.875rem;
+		padding: 0 0.625rem;
 		color: rgb(255 255 255 / 70%);
-		font-size: 0.75rem;
+		font-size: 0.6875rem;
 		font-weight: 800;
 		line-height: 1;
 		transition:
@@ -144,5 +167,110 @@
 	.glass-demo-control[aria-pressed="true"] {
 		background: rgb(63 231 203 / 22%);
 		color: white;
+	}
+
+	.glass-demo-controls-panel {
+		display: grid;
+		gap: 1rem;
+		border: 1px solid rgb(255 255 255 / 14%);
+		border-radius: 0.5rem;
+		background: rgb(0 0 0 / 34%);
+		padding: 0.75rem;
+		backdrop-filter: blur(12px);
+	}
+
+	.glass-demo-range {
+		display: grid;
+		min-width: 0;
+		gap: 0.5rem;
+	}
+
+	.glass-demo-range-label {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+		color: rgb(255 255 255 / 78%);
+		font-size: 0.75rem;
+		font-weight: 900;
+		line-height: 1;
+	}
+
+	.glass-demo-range-label output {
+		min-width: 2.2rem;
+		border-radius: 9999px;
+		background: rgb(63 231 203 / 16%);
+		padding: 0.25rem 0.45rem;
+		color: white;
+		text-align: center;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.glass-demo-range input[type="range"] {
+		width: 100%;
+		min-width: 0;
+		height: 1.5rem;
+		appearance: none;
+		cursor: pointer;
+		background: transparent;
+	}
+
+	.glass-demo-range input[type="range"]::-webkit-slider-runnable-track {
+		height: 0.35rem;
+		border-radius: 9999px;
+		background:
+			linear-gradient(
+				90deg,
+				rgb(63 231 203 / 88%) var(--glass-range-value),
+				rgb(255 255 255 / 16%) var(--glass-range-value)
+			);
+	}
+
+	.glass-demo-range input[type="range"]::-webkit-slider-thumb {
+		width: 1rem;
+		height: 1rem;
+		margin-top: -0.325rem;
+		appearance: none;
+		border: 2px solid #101114;
+		border-radius: 9999px;
+		background: #ffda5c;
+		box-shadow: 0 0 0 2px rgb(255 255 255 / 22%);
+	}
+
+	.glass-demo-range input[type="range"]::-moz-range-track {
+		height: 0.35rem;
+		border-radius: 9999px;
+		background: rgb(255 255 255 / 16%);
+	}
+
+	.glass-demo-range input[type="range"]::-moz-range-progress {
+		height: 0.35rem;
+		border-radius: 9999px;
+		background: rgb(63 231 203 / 88%);
+	}
+
+	.glass-demo-range input[type="range"]::-moz-range-thumb {
+		width: 1rem;
+		height: 1rem;
+		border: 2px solid #101114;
+		border-radius: 9999px;
+		background: #ffda5c;
+		box-shadow: 0 0 0 2px rgb(255 255 255 / 22%);
+	}
+
+	.glass-demo-range input[type="range"]:focus-visible {
+		outline: 3px solid rgb(63 231 203 / 44%);
+		outline-offset: 0.25rem;
+	}
+
+	@media (min-width: 64rem) {
+		.glass-demo-controls-panel {
+			grid-template-columns: minmax(0, 1fr) auto;
+			align-items: center;
+		}
+
+		.glass-demo-switches {
+			justify-content: flex-end;
+		}
 	}
 }

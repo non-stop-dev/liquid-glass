@@ -11,6 +11,7 @@ import type {
 	LiquidGlassInteriorLens,
 	LiquidGlassRadius,
 	LiquidGlassShape,
+	LiquidGlassSpecularHighlight,
 } from "./types.js";
 import type { LiquidGlassSurfaceController } from "./dom.js";
 
@@ -34,7 +35,7 @@ interface RenderOptions {
 	bezel: number;
 	scale: number;
 	activeEdges: LiquidGlassEdges;
-	specularHighlight: LiquidGlassEdges;
+	specularHighlight: LiquidGlassSpecularHighlight;
 	hasSpecularHighlight: boolean;
 	fillRefraction: boolean;
 	interiorLens: LiquidGlassInteriorLens;
@@ -126,9 +127,7 @@ function readRenderOptions(element: LiquidGlassSurfaceElement): RenderOptions {
 	const bezel = readControl(element.getAttribute("bezel"), 5);
 	const scale = readControl(element.getAttribute("scale"), 4);
 	const activeEdges = readEdges(element.getAttribute("active-edges"));
-	const specularHighlight = readEdges(
-		element.getAttribute("specular-highlight"),
-	);
+	const specularHighlight = readBoolean(element.getAttribute("specular-highlight"), true);
 	const fillRefraction = element.getAttribute("fill-refraction") === "true";
 	const interiorLens = readInteriorLens(element);
 	const deformationX = readControl(element.getAttribute("deformation-x"), 2);
@@ -156,7 +155,7 @@ function readRenderOptions(element: LiquidGlassSurfaceElement): RenderOptions {
 		scale,
 		activeEdges,
 		specularHighlight,
-		hasSpecularHighlight: specularHighlight !== "none",
+		hasSpecularHighlight: specularHighlight,
 		fillRefraction,
 		interiorLens,
 		deformationX,
@@ -233,9 +232,7 @@ function createSurface(options: RenderOptions): HTMLDivElement {
 	surface.dataset.liquidGlassActiveEdges = serializeLiquidGlassEdges(
 		options.activeEdges,
 	);
-	surface.dataset.liquidGlassSpecularHighlight = serializeLiquidGlassEdges(
-		options.specularHighlight,
-	);
+	surface.dataset.liquidGlassSpecularHighlight = String(options.specularHighlight);
 	surface.dataset.liquidGlassSpecularActive = options.hasSpecularHighlight
 		? "true"
 		: "false";
@@ -316,6 +313,14 @@ function readEdges(value: string | null): LiquidGlassEdges {
 
 function isLiquidGlassEdge(edge: string): edge is LiquidGlassEdge {
 	return edge === "top" || edge === "right" || edge === "bottom" || edge === "left";
+}
+
+function readBoolean(value: string | null, fallback: boolean): boolean {
+	if (value === null) {
+		return fallback;
+	}
+
+	return value === "true";
 }
 
 function readInteriorLens(element: HTMLElement): LiquidGlassInteriorLens {

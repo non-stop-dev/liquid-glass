@@ -4,7 +4,7 @@ export type LiquidGlassShape = "rounded-rect" | "circle";
 /** "capsule" or normalized 0-10 radius. */
 export type LiquidGlassRadius = "capsule" | number;
 
-/** Physical edge names used for refraction and specular highlight masks. */
+/** Physical edge names used for refraction masks. */
 export type LiquidGlassEdge = "top" | "right" | "bottom" | "left";
 
 /** All edges, no edges, one edge, or a readonly list of selected edges. */
@@ -13,6 +13,9 @@ export type LiquidGlassEdges =
 	| "none"
 	| LiquidGlassEdge
 	| readonly LiquidGlassEdge[];
+
+/** Enables or disables the generated normal-based rim highlight. */
+export type LiquidGlassSpecularHighlight = boolean;
 
 /** Interior lens deformation model. */
 export type LiquidGlassInteriorLens = "linear" | "fisheye";
@@ -45,8 +48,8 @@ export interface LiquidGlassProps {
 	/** Which edges participate in refraction. */
 	activeEdges?: LiquidGlassEdges;
 
-	/** Which edges receive normal-based specular highlight. */
-	specularHighlight?: LiquidGlassEdges;
+	/** When true, renders a generated normal-based specular rim highlight. */
+	specularHighlight?: LiquidGlassSpecularHighlight;
 
 	/** When true, the whole surface participates in refraction instead of bezel only. */
 	fillRefraction?: boolean;
@@ -74,7 +77,7 @@ export interface LiquidGlassMapOptions {
 	radius: LiquidGlassRadius;
 	bezel: number;
 	activeEdges: LiquidGlassEdges;
-	specularHighlight: LiquidGlassEdges;
+	specularHighlight: LiquidGlassSpecularHighlight;
 	dpr: number;
 	scale: number;
 	fillRefraction?: boolean;

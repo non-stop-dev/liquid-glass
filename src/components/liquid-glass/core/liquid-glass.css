@@ -1,3 +1,9 @@
+@property --liquid-glass-specular-angle {
+	syntax: "<angle>";
+	inherits: false;
+	initial-value: 22deg;
+}
+
 liquid-glass-surface {
 	position: absolute;
 	inset: 0;
@@ -35,9 +41,29 @@ liquid-glass-surface .liquid-glass__tint {
 
 liquid-glass-surface .liquid-glass__specular {
 	z-index: 2;
+	--liquid-glass-specular-angle: 22deg;
+	background: conic-gradient(
+		from var(--liquid-glass-specular-angle) at 50% 50%,
+		transparent 0deg 27deg,
+		rgb(255 255 255 / 8%) 36deg,
+		rgb(255 255 255 / 84%) 43deg,
+		rgb(255 255 255 / 18%) 52deg,
+		transparent 72deg 205deg,
+		rgb(255 255 255 / 10%) 224deg,
+		transparent 248deg 360deg
+	);
 	background-position: center;
 	background-repeat: no-repeat;
 	background-size: 100% 100%;
+	mask-image: var(--liquid-glass-specular-mask);
+	mask-mode: alpha;
+	mask-position: center;
+	mask-repeat: no-repeat;
+	mask-size: 100% 100%;
+	-webkit-mask-image: var(--liquid-glass-specular-mask);
+	-webkit-mask-position: center;
+	-webkit-mask-repeat: no-repeat;
+	-webkit-mask-size: 100% 100%;
 	mix-blend-mode: screen;
 	opacity: 0;
 	transition: opacity 180ms ease;
@@ -46,7 +72,8 @@ liquid-glass-surface .liquid-glass__specular {
 liquid-glass-surface
 	.liquid-glass[data-liquid-glass-ready="true"][data-liquid-glass-specular-active="true"]
 	.liquid-glass__specular {
-	opacity: 0.4;
+	animation: liquid-glass-specular-sweep 14s linear infinite;
+	opacity: 0.34;
 }
 
 liquid-glass-surface .liquid-glass__svg {
@@ -69,6 +96,18 @@ liquid-glass-surface .liquid-glass__svg {
 
 @media (prefers-reduced-motion: reduce) {
 	liquid-glass-surface .liquid-glass__specular {
+		--liquid-glass-specular-angle: 52deg;
+		animation: none;
 		transition: none;
+	}
+}
+
+@keyframes liquid-glass-specular-sweep {
+	from {
+		--liquid-glass-specular-angle: 22deg;
+	}
+
+	to {
+		--liquid-glass-specular-angle: 382deg;
 	}
 }

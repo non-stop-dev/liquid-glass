@@ -51,7 +51,7 @@ export function liquidGlassPropsToAttributes(
 		"specular-highlight",
 		props.specularHighlight === undefined
 			? undefined
-			: serializeLiquidGlassEdges(props.specularHighlight),
+			: String(props.specularHighlight),
 	);
 	assignAttribute(
 		attributes,

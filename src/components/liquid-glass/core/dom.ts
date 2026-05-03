@@ -6,6 +6,7 @@ import {
 	type LiquidGlassInteriorLens,
 	type LiquidGlassRadius,
 	type LiquidGlassShape,
+	type LiquidGlassSpecularHighlight,
 } from "./maps.js";
 
 interface LiquidGlassSurfaceElements {
@@ -112,7 +113,10 @@ function updateLiquidGlassSurface(elements: LiquidGlassSurfaceElements): void {
 		elements.displacement?.setAttribute("scale", String(maps.displacementScale));
 
 		if (elements.specular) {
-			elements.specular.style.backgroundImage = `url("${maps.specularMap}")`;
+			elements.specular.style.setProperty(
+				"--liquid-glass-specular-mask",
+				`url("${maps.specularMap}")`,
+			);
 		}
 
 		elements.surface.dataset.liquidGlassReady = "true";
@@ -155,7 +159,7 @@ function readSurfaceOptions(
 		radius: readRadius(surface),
 		bezel: readControl(surface.dataset.liquidGlassBezel, 5),
 		activeEdges: readEdges(surface.dataset.liquidGlassActiveEdges),
-		specularHighlight: readEdges(
+		specularHighlight: readSpecularHighlight(
 			surface.dataset.liquidGlassSpecularHighlight,
 		),
 		dpr: window.devicePixelRatio || 1,
@@ -234,6 +238,12 @@ function readEdges(value: string | undefined): LiquidGlassEdges {
 		.filter(isLiquidGlassEdge);
 
 	return edges.length > 0 ? edges : "all";
+}
+
+function readSpecularHighlight(
+	value: string | undefined,
+): LiquidGlassSpecularHighlight {
+	return value !== "false";
 }
 
 function isLiquidGlassEdge(edge: string): edge is LiquidGlassEdge {
