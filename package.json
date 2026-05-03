@@ -7,10 +7,10 @@
 	"private": false,
 	"sideEffects": [
 		"**/*.css",
-		"dist/liquid-glass/index.js",
-		"dist/liquid-glass/core/define-element.js",
-		"dist/liquid-glass/react/*.js",
-		"dist/liquid-glass/astro/*.astro"
+		"dist/components/liquid-glass/index.js",
+		"dist/components/liquid-glass/core/define-element.js",
+		"dist/components/liquid-glass/react/*.js",
+		"dist/components/liquid-glass/astro/*.astro"
 	],
 	"files": [
 		"dist",
@@ -24,26 +24,25 @@
 			"default": "./dist/index.js"
 		},
 		"./liquid-glass": {
-			"types": "./dist/liquid-glass/index.d.ts",
-			"default": "./dist/liquid-glass/index.js"
+			"types": "./dist/components/liquid-glass/index.d.ts",
+			"default": "./dist/components/liquid-glass/index.js"
 		},
 		"./astro": {
-			"types": "./dist/liquid-glass/astro/index.d.ts",
-			"default": "./dist/liquid-glass/astro/index.js"
+			"types": "./dist/components/liquid-glass/astro/index.d.ts",
+			"default": "./dist/components/liquid-glass/astro/index.js"
 		},
 		"./react": {
-			"types": "./dist/liquid-glass/react/index.d.ts",
-			"default": "./dist/liquid-glass/react/index.js"
+			"types": "./dist/components/liquid-glass/react/index.d.ts",
+			"default": "./dist/components/liquid-glass/react/index.js"
 		},
-		"./styles.css": "./dist/liquid-glass/core/liquid-glass.css"
+		"./styles.css": "./dist/components/liquid-glass/core/liquid-glass.css"
 	},
 	"scripts": {
+		"dev": "astro dev --host 127.0.0.1",
 		"build": "tsc -p tsconfig.build.json && node scripts/copy-static.mjs",
+		"site:build": "astro build",
 		"typecheck": "tsc --noEmit",
-		"test": "vitest run",
-		"dev:astro": "pnpm -C examples/astro dev",
-		"dev:react": "pnpm -C examples/react dev",
-		"build:examples": "pnpm -C examples/astro build && pnpm -C examples/react build"
+		"test": "vitest run"
 	},
 	"peerDependencies": {
 		"astro": ">=5 <7",
@@ -59,6 +58,8 @@
 	},
 	"devDependencies": {
 		"@astrojs/react": "5.0.4",
+		"@lucide/astro": "^1.14.0",
+		"@tailwindcss/vite": "^4.2.4",
 		"@types/node": "24.9.1",
 		"@types/react": "19.2.2",
 		"@types/react-dom": "19.2.2",
@@ -67,6 +68,7 @@
 		"jsdom": "^27.0.0",
 		"react": "19.2.0",
 		"react-dom": "19.2.0",
+		"tailwindcss": "^4.2.4",
 		"typescript": "^5.9.3",
 		"vite": "^7.1.0",
 		"vitest": "^4.0.0"

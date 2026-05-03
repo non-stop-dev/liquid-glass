@@ -1,0 +1,95 @@
+---
+import Header from "../components/site/Header.astro";
+import LiquidGlassSurface from "../components/liquid-glass/astro/LiquidGlassSurface.astro";
+import "../styles/global.css";
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta
+			name="description"
+			content="Rawr Labs visual component library with liquid glass primitives for Astro, React, and the web platform."
+		/>
+		<title>Rawr Labs Visual Components</title>
+	</head>
+	<body>
+		<div class="docs-shell">
+			<Header />
+			<main>
+				<section class="mx-auto grid min-h-[calc(100vh-4rem)] max-w-7xl items-center gap-10 overflow-hidden px-5 py-16 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
+					<div class="min-w-0">
+						<p class="mb-4 text-sm font-black uppercase tracking-[0.24em] text-primary">
+							@rawr-labs/visual-components
+						</p>
+						<h1 class="max-w-3xl text-5xl font-black leading-[0.94] tracking-normal text-white md:text-6xl lg:text-7xl">
+							Visual components with real optical behavior.
+						</h1>
+						<p class="mt-6 max-w-2xl text-lg leading-8 text-white/72 md:text-xl">
+							A framework-agnostic component library for Rawr Labs interfaces, with a custom-element core and thin Astro and React wrappers.
+						</p>
+						<div class="mt-8 flex flex-wrap gap-3">
+							<a href="/components/" class="focus-ring rounded-md bg-primary px-5 py-3 text-sm font-black text-ink transition hover:bg-primary/90">
+								Browse Components
+							</a>
+							<a href="/components/#liquid-glass" class="focus-ring rounded-md border border-white/16 px-5 py-3 text-sm font-black text-white transition hover:border-secondary/60 hover:text-secondary">
+								View Liquid Glass
+							</a>
+						</div>
+					</div>
+
+					<div class="relative min-h-[34rem] min-w-0 overflow-hidden rounded-lg border border-white/10 bg-[radial-gradient(circle_at_18%_14%,rgb(63_231_203_/_78%),transparent_17rem),radial-gradient(circle_at_86%_26%,rgb(255_218_92_/_84%),transparent_16rem),linear-gradient(145deg,#101114,#20232b_48%,#15171c)]">
+						<div class="absolute inset-0 grid content-center gap-3 px-8 text-7xl font-black leading-none text-white/80" aria-hidden="true">
+							<span>RAW R</span>
+							<span class="text-secondary/90">VISUAL</span>
+							<span class="text-primary/85">GLASS</span>
+						</div>
+						<div class="absolute inset-x-5 top-6 h-18 overflow-hidden rounded-full">
+							<LiquidGlassSurface
+								id="home-nav-glass"
+								class="absolute inset-0"
+								radius="capsule"
+								bezel={1}
+								scale={4.3}
+								activeEdges="all"
+								specularHighlight="none"
+								fillRefraction
+								interiorLens="fisheye"
+								deformationX={3}
+								deformationY={3}
+								frosted={4}
+								frostedTint="black"
+							/>
+							<div class="relative z-10 flex h-full items-center justify-between px-5 text-white">
+								<strong>Rawr Labs</strong>
+								<span class="hidden text-sm font-semibold text-white/72 lg:inline">Liquid Glass</span>
+							</div>
+						</div>
+						<div class="absolute bottom-6 left-6 size-24 overflow-hidden rounded-full">
+							<LiquidGlassSurface
+								id="home-button-glass"
+								class="absolute inset-0"
+								shape="circle"
+								radius={10}
+								bezel={2}
+								scale={3.6}
+								activeEdges="all"
+								specularHighlight="all"
+								fillRefraction
+								interiorLens="fisheye"
+								deformationX={2}
+								deformationY={2}
+								frosted={3}
+								frostedTint="black"
+							/>
+							<div class="relative z-10 grid size-full place-items-center text-sm font-black">
+								Core
+							</div>
+						</div>
+					</div>
+				</section>
+			</main>
+		</div>
+	</body>
+</html>

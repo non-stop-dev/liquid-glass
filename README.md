@@ -4,6 +4,8 @@ Framework-agnostic visual primitives for Rawr Labs interfaces.
 
 The first component is `liquid-glass-surface`, a custom element that renders one empty backdrop-filter layer backed by deterministic SVG displacement maps. The core custom element is the source of truth. Astro and React wrappers exist only for typed props, IntelliSense, and framework ergonomics.
 
+Component source lives in dedicated folders under `src/components/`. The Astro documentation site lives in `src/pages/`.
+
 ## Install
 
 ```sh

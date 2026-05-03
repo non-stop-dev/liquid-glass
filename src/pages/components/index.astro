@@ -1,0 +1,100 @@
+---
+import Header from "../../components/site/Header.astro";
+import ComponentDemo from "../../components/site/ComponentDemo.astro";
+import "../../styles/global.css";
+
+const components = [
+	{ href: "#liquid-glass", label: "Liquid Glass" },
+];
+
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta
+			name="description"
+			content="Rawr Labs visual components documentation with component examples and framework usage."
+		/>
+		<title>Components | Rawr Labs Visual Components</title>
+	</head>
+	<body>
+		<div class="docs-shell">
+			<Header />
+			<main class="mx-auto grid max-w-7xl gap-8 overflow-hidden px-5 py-10 lg:grid-cols-[16rem_minmax(0,1fr)]">
+				<aside class="lg:sticky lg:top-24 lg:h-[calc(100vh-7rem)]">
+					<nav class="rounded-lg border border-white/10 bg-white/[0.04] p-3" aria-label="Visual components">
+						<p class="px-3 pb-2 text-xs font-black uppercase tracking-[0.22em] text-primary">
+							Components
+						</p>
+						<ul class="space-y-1">
+							{
+								components.map((component) => (
+									<li>
+										<a
+											href={component.href}
+											class="focus-ring block rounded-md px-3 py-2 text-sm font-bold text-white/74 transition hover:bg-white/8 hover:text-white"
+										>
+											{component.label}
+										</a>
+									</li>
+								))
+							}
+						</ul>
+					</nav>
+				</aside>
+
+				<article id="liquid-glass" class="min-w-0 scroll-mt-24 overflow-hidden">
+					<header class="mb-8">
+						<p class="mb-3 text-sm font-black uppercase tracking-[0.24em] text-secondary">
+							Visual Component
+						</p>
+						<h1 class="text-4xl font-black leading-tight md:text-5xl lg:text-6xl">Liquid Glass</h1>
+						<p class="mt-4 max-w-3xl text-lg leading-8 text-white/72">
+							A custom-element core for deterministic SVG displacement through CSS backdrop filtering, with typed Astro and React wrappers for framework ergonomics.
+						</p>
+					</header>
+
+					<div class="grid gap-4">
+						<ComponentDemo id="docs-nav-glass" title="Navigation Surface" variant="nav" />
+						<ComponentDemo id="docs-card-glass" title="Card Surface" variant="card" />
+						<ComponentDemo id="docs-button-glass" title="Action" variant="button" />
+					</div>
+
+					<section class="mt-10">
+						<div class="mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+							<div>
+								<h2 class="text-2xl font-black">Usage Notes</h2>
+								<p class="mt-2 max-w-2xl text-sm leading-6 text-white/66">
+									Each example above includes exact prop values and copy-paste snippets for HTML, CSS, Tailwind, TypeScript, Astro, and React.
+								</p>
+							</div>
+						</div>
+					</section>
+
+					<section class="mt-10 grid gap-4 md:grid-cols-3">
+						<div class="rounded-lg border border-white/10 bg-white/[0.04] p-5">
+							<h2 class="text-lg font-black text-primary">Core</h2>
+							<p class="mt-2 text-sm leading-6 text-white/66">
+								The web component owns physics, SVG setup, resizing, cache keys, fallbacks, and CSS classes.
+							</p>
+						</div>
+						<div class="rounded-lg border border-white/10 bg-white/[0.04] p-5">
+							<h2 class="text-lg font-black text-secondary">Wrappers</h2>
+							<p class="mt-2 text-sm leading-6 text-white/66">
+								Astro and React only map typed props to custom-element attributes and register the core element.
+							</p>
+						</div>
+						<div class="rounded-lg border border-white/10 bg-white/[0.04] p-5">
+							<h2 class="text-lg font-black text-white">Physics</h2>
+							<p class="mt-2 text-sm leading-6 text-white/66">
+								Red controls X displacement, green controls Y displacement, and neutral is 128.
+							</p>
+						</div>
+					</section>
+				</article>
+			</main>
+		</div>
+	</body>
+</html>

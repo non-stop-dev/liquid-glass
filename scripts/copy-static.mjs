@@ -7,16 +7,16 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
 const copyTargets = [
 	{
-		from: "src/liquid-glass/core/liquid-glass.css",
-		to: "dist/liquid-glass/core/liquid-glass.css",
+		from: "src/components/liquid-glass/core/liquid-glass.css",
+		to: "dist/components/liquid-glass/core/liquid-glass.css",
 	},
 	{
-		from: "src/liquid-glass/astro/LiquidGlassSurface.astro",
-		to: "dist/liquid-glass/astro/LiquidGlassSurface.astro",
+		from: "src/components/liquid-glass/astro/LiquidGlassSurface.astro",
+		to: "dist/components/liquid-glass/astro/LiquidGlassSurface.astro",
 	},
 	{
-		from: "src/liquid-glass/astro/LiquidGlassSurface.astro.d.ts",
-		to: "dist/liquid-glass/astro/LiquidGlassSurface.astro.d.ts",
+		from: "src/components/liquid-glass/astro/LiquidGlassSurface.astro.d.ts",
+		to: "dist/components/liquid-glass/astro/LiquidGlassSurface.astro.d.ts",
 	},
 	{
 		from: ".agents/skills/liquid-glass",

@@ -1,1 +1,1 @@
-export * from "./liquid-glass/index.js";
+export * from "./components/liquid-glass/index.js";

@@ -1,0 +1,628 @@
+---
+import { ChevronLeft, ChevronRight } from "@lucide/astro";
+import LiquidGlassSurface from "../liquid-glass/astro/LiquidGlassSurface.astro";
+import CodeTabs from "./CodeTabs.astro";
+
+interface Props {
+	id: string;
+	title: string;
+	variant?: "nav" | "card" | "button";
+}
+
+const { id, title, variant = "nav" } = Astro.props;
+const isButton = variant === "button";
+const shape = isButton ? "circle" : "rounded-rect";
+const hostClass = isButton
+	? "relative grid size-24 place-items-center overflow-hidden rounded-full"
+	: variant === "card"
+		? "relative min-h-64 overflow-hidden rounded-2xl"
+		: "relative h-18 overflow-hidden rounded-full";
+const radius = isButton ? 10 : "capsule";
+const bezel = variant === "card" ? 2 : 1;
+const scale = variant === "card" ? 3.2 : 4.3;
+const specularHighlight = variant === "card" ? "all" : "none";
+const deformationY = variant === "nav" ? 3 : 2;
+const backgroundImages = [
+	"/backgrounds-for-components/pexels-alexant-7004739.jpg",
+	"/backgrounds-for-components/pexels-karola-g-4022107.jpg",
+	"/backgrounds-for-components/pexels-lilartsy-3750777.jpg",
+	"/backgrounds-for-components/pexels-maria-doina-mareggini-898057922-37252471.jpg",
+] as const;
+const firstBackground = backgroundImages[0];
+const contentMarkup = isButton
+	? `<span>${title}</span>`
+	: `<strong>${title}</strong>
+  <span class="hidden text-sm font-semibold text-white/76 lg:inline">One filtered layer</span>`;
+const contentClass = isButton
+	? "relative z-10 text-sm font-black"
+	: "relative z-10 flex h-full items-center justify-between px-5 text-white";
+const canvasClass =
+	"relative h-[clamp(22rem,52vw,34rem)] w-full overflow-hidden rounded-lg bg-ink";
+const backgroundImageClass =
+	"absolute left-0 top-1/2 h-auto w-full max-w-none -translate-y-1/2 transition-opacity duration-300";
+const draggableClass =
+	variant === "card"
+		? "absolute left-1/2 top-14 z-10 w-[min(28rem,calc(100%-2.5rem))] -translate-x-1/2 cursor-grab touch-none select-none active:cursor-grabbing"
+		: variant === "button"
+			? "absolute left-8 top-18 z-10 cursor-grab touch-none select-none active:cursor-grabbing"
+			: "absolute left-5 top-18 z-10 w-[min(46rem,calc(100%-2.5rem))] cursor-grab touch-none select-none active:cursor-grabbing";
+const staticExampleClass =
+	variant === "card"
+		? "absolute left-1/2 top-14 z-10 w-[min(28rem,calc(100%-2.5rem))] -translate-x-1/2"
+		: variant === "button"
+			? "absolute left-8 top-18 z-10"
+			: "absolute left-5 top-18 z-10 w-[min(46rem,calc(100%-2.5rem))]";
+const cssSurfaceRules =
+	variant === "card"
+		? `  position: absolute;
+  left: 50%;
+  top: 3.5rem;
+  z-index: 10;
+  width: min(28rem, calc(100% - 2.5rem));
+  transform: translateX(-50%);`
+		: variant === "button"
+			? `  position: absolute;
+  left: 2rem;
+  top: 4.5rem;
+  z-index: 10;`
+			: `  position: absolute;
+  left: 1.25rem;
+  top: 4.5rem;
+  z-index: 10;
+  width: min(46rem, calc(100% - 2.5rem));`;
+const propRows = [
+	["id", `"${id}"`],
+	["shape", `"${shape}"`],
+	["radius", typeof radius === "number" ? String(radius) : `"${radius}"`],
+	["bezel", String(bezel)],
+	["scale", String(scale)],
+	["activeEdges", `"all"`],
+	["specularHighlight", `"${specularHighlight}"`],
+	["fillRefraction", "true"],
+	["interiorLens", `"fisheye"`],
+	["deformationX", "3"],
+	["deformationY", String(deformationY)],
+	["frosted", "4"],
+	["frostedTint", `"white"`],
+] as const;
+const htmlAttributes = `id="${id}"
+    class="absolute inset-0"
+    shape="${shape}"
+    radius="${radius}"
+    bezel="${bezel}"
+    scale="${scale}"
+    active-edges="all"
+    specular-highlight="${specularHighlight}"
+    fill-refraction="true"
+    interior-lens="fisheye"
+    deformation-x="3"
+    deformation-y="${deformationY}"
+    frosted="4"
+    frosted-tint="white"`;
+const astroProps = `id="${id}"
+    class="absolute inset-0"
+    shape="${shape}"
+    radius={${typeof radius === "number" ? radius : `"${radius}"`}}
+    bezel={${bezel}}
+    scale={${scale}}
+    activeEdges="all"
+    specularHighlight="${specularHighlight}"
+    fillRefraction
+    interiorLens="fisheye"
+    deformationX={3}
+    deformationY={${deformationY}}
+    frosted={4}
+    frostedTint="white"`;
+const reactProps = `id="${id}"
+        className="absolute inset-0"
+        shape="${shape}"
+        radius={${typeof radius === "number" ? radius : `"${radius}"`}}
+        bezel={${bezel}}
+        scale={${scale}}
+        activeEdges="all"
+        specularHighlight="${specularHighlight}"
+        fillRefraction
+        interiorLens="fisheye"
+        deformationX={3}
+        deformationY={${deformationY}}
+        frosted={4}
+        frostedTint="white"`;
+const codeExamples = [
+	{
+		label: "HTML",
+		code: `<script type="module">
+  import "@rawr-labs/visual-components/liquid-glass";
+  import "@rawr-labs/visual-components/styles.css";
+</script>
+
+<section class="demo-frame">
+  <img class="demo-bg" src="${firstBackground}" alt="" />
+  <div class="demo-surface">
+    <div class="${hostClass}">
+      <liquid-glass-surface
+      ${htmlAttributes}
+      ></liquid-glass-surface>
+      <div class="${contentClass}">
+        ${contentMarkup}
+      </div>
+    </div>
+  </div>
+</section>`,
+	},
+	{
+		label: "CSS",
+		code: `.demo-frame {
+  position: relative;
+  width: 100%;
+  height: clamp(22rem, 52vw, 34rem);
+  overflow: hidden;
+  border-radius: 0.5rem;
+}
+
+.demo-bg {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 100%;
+  height: auto;
+  max-width: none;
+  transform: translateY(-50%);
+}
+
+.glass-content {
+  position: relative;
+  z-index: 10;
+}
+
+.demo-surface {
+${cssSurfaceRules}
+}`,
+	},
+	{
+		label: "Tailwind",
+		code: `<section class="${canvasClass}">
+  <img class="${backgroundImageClass}" src="${firstBackground}" alt="" />
+  <div class="${staticExampleClass}">
+    <div class="${hostClass}">
+      <liquid-glass-surface
+      ${htmlAttributes}
+      ></liquid-glass-surface>
+      <div class="${contentClass}">
+        ${contentMarkup}
+      </div>
+    </div>
+  </div>
+</section>`,
+	},
+	{
+		label: "TypeScript",
+		code: `import type { LiquidGlassProps } from "@rawr-labs/visual-components";
+
+export const ${id.replaceAll("-", "")}Props: LiquidGlassProps = {
+  ${propRows.map(([name, value]) => `${name}: ${value}`).join(",\n  ")},
+};`,
+	},
+	{
+		label: "Astro",
+		code: `---
+import { LiquidGlassSurface } from "@rawr-labs/visual-components/astro";
+---
+
+<section class="${canvasClass}">
+  <img class="${backgroundImageClass}" src="${firstBackground}" alt="" />
+  <div class="${staticExampleClass}">
+    <div class="${hostClass}">
+      <LiquidGlassSurface
+      ${astroProps}
+      />
+      <div class="${contentClass}">
+        ${contentMarkup}
+      </div>
+    </div>
+  </div>
+</section>`,
+	},
+	{
+		label: "React",
+		code: `import { LiquidGlassSurface } from "@rawr-labs/visual-components/react";
+
+export function ${variant === "nav" ? "NavigationSurface" : variant === "card" ? "CardSurface" : "ActionSurface"}() {
+  return (
+    <section className="${canvasClass}">
+      <img className="${backgroundImageClass}" src="${firstBackground}" alt="" />
+      <div className="${staticExampleClass}">
+        <div className="${hostClass}">
+          <LiquidGlassSurface
+          ${reactProps}
+          />
+          <div className="${contentClass}">
+            ${contentMarkup}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}`,
+	},
+];
+---
+
+<section
+	class="w-full min-w-0 overflow-hidden rounded-lg border border-white/10 bg-white/[0.03] p-4"
+	data-component-demo={id}
+	data-glass-finish="4"
+	data-glass-tint="white"
+	data-glass-lens="fisheye"
+	style="contain: inline-size;"
+>
+	<div
+		class={canvasClass}
+		data-background-carousel
+		data-demo-canvas
+	>
+		<div class="absolute inset-0" aria-hidden="true">
+			{
+				backgroundImages.map((image, index) => (
+					<img
+						src={image}
+						alt=""
+						loading={index === 0 ? "eager" : "lazy"}
+						class:list={[
+							backgroundImageClass,
+							index === 0 ? "opacity-100" : "opacity-0",
+						]}
+						data-background-image
+					/>
+				))
+			}
+			<div class="absolute inset-0 bg-black/28"></div>
+			<div class="absolute inset-0 bg-gradient-to-br from-primary/18 via-ink/14 to-secondary/18"></div>
+		</div>
+		<div class="absolute left-4 top-4 z-30 flex gap-2">
+			<button
+				type="button"
+				class="focus-ring grid size-10 place-items-center rounded-full border border-white/16 bg-black/45 text-white backdrop-blur-md transition hover:border-primary/60 hover:text-primary"
+				aria-label={`Previous background for ${title}`}
+				data-background-previous
+			>
+				<ChevronLeft size={20} stroke-width={2.4} aria-hidden="true" />
+			</button>
+			<button
+				type="button"
+				class="focus-ring grid size-10 place-items-center rounded-full border border-white/16 bg-black/45 text-white backdrop-blur-md transition hover:border-primary/60 hover:text-primary"
+				aria-label={`Next background for ${title}`}
+				data-background-next
+			>
+				<ChevronRight size={20} stroke-width={2.4} aria-hidden="true" />
+			</button>
+		</div>
+		<p class="absolute bottom-4 left-4 z-20 rounded-md bg-black/45 px-3 py-2 text-xs font-bold text-white/72 backdrop-blur-md">
+			Drag the glass surface across the background
+		</p>
+		<div
+			class={draggableClass}
+			data-draggable-glass
+			aria-label={`Drag ${title}`}
+		>
+			<div class={hostClass}>
+				<LiquidGlassSurface
+					id={id}
+					class="absolute inset-0"
+					shape={shape}
+					radius={radius}
+					bezel={bezel}
+					scale={scale}
+					activeEdges="all"
+					specularHighlight={specularHighlight}
+					fillRefraction
+					interiorLens="fisheye"
+					deformationX={3}
+					deformationY={deformationY}
+					frosted={4}
+					frostedTint="white"
+				/>
+				<div class={contentClass}>
+					{
+						isButton ? (
+							<span>{title}</span>
+						) : (
+								<>
+									<strong>{title}</strong>
+									<span class="hidden text-sm font-semibold text-white/76 lg:inline">One filtered layer</span>
+								</>
+						)
+					}
+				</div>
+			</div>
+			</div>
+		</div>
+		<div
+			class="mt-3 flex flex-wrap gap-2"
+			aria-label={`${title} liquid glass controls`}
+		>
+			<div class="glass-demo-segment" role="group" aria-label="Crystal finish">
+				<button
+					type="button"
+					class="glass-demo-control focus-ring"
+					aria-pressed="false"
+					data-glass-control="finish"
+					data-glass-attribute="frosted"
+					data-glass-value="0"
+				>
+					Polished
+				</button>
+				<button
+					type="button"
+					class="glass-demo-control focus-ring"
+					aria-pressed="true"
+					data-glass-control="finish"
+					data-glass-attribute="frosted"
+					data-glass-value="4"
+				>
+					Frosted
+				</button>
+			</div>
+			<div class="glass-demo-segment" role="group" aria-label="Frosted tint">
+				<button
+					type="button"
+					class="glass-demo-control focus-ring"
+					aria-pressed="true"
+					data-glass-control="tint"
+					data-glass-attribute="frosted-tint"
+					data-glass-value="white"
+				>
+					White
+				</button>
+				<button
+					type="button"
+					class="glass-demo-control focus-ring"
+					aria-pressed="false"
+					data-glass-control="tint"
+					data-glass-attribute="frosted-tint"
+					data-glass-value="black"
+				>
+					Black
+				</button>
+			</div>
+			<div class="glass-demo-segment" role="group" aria-label="Interior lens">
+				<button
+					type="button"
+					class="glass-demo-control focus-ring"
+					aria-pressed="false"
+					data-glass-control="lens"
+					data-glass-attribute="interior-lens"
+					data-glass-value="linear"
+				>
+					Linear
+				</button>
+				<button
+					type="button"
+					class="glass-demo-control focus-ring"
+					aria-pressed="true"
+					data-glass-control="lens"
+					data-glass-attribute="interior-lens"
+					data-glass-value="fisheye"
+				>
+					Fisheye
+				</button>
+			</div>
+		</div>
+		<div class="mt-4 min-w-0" style="contain: inline-size;">
+			<CodeTabs id={`${id}-code`} examples={codeExamples} />
+		</div>
+</section>
+
+<script>
+	const carouselWindow = window as Window & {
+		rawrBackgroundCarouselReadyV3?: boolean;
+	};
+
+	if (!carouselWindow.rawrBackgroundCarouselReadyV3) {
+		carouselWindow.rawrBackgroundCarouselReadyV3 = true;
+
+		document.addEventListener("click", (event) => {
+			const target = event.target;
+
+			if (!(target instanceof Element)) {
+				return;
+			}
+
+			const previous = target.closest("[data-background-previous]");
+			const next = target.closest("[data-background-next]");
+
+			if (!previous && !next) {
+				return;
+			}
+
+			const carousel = target.closest<HTMLElement>("[data-background-carousel]");
+
+			if (!carousel) {
+				return;
+			}
+
+			const images = Array.from(
+				carousel.querySelectorAll<HTMLImageElement>("[data-background-image]"),
+			);
+
+			if (images.length === 0) {
+				return;
+			}
+
+			const direction = previous ? -1 : 1;
+			const currentIndex = Number(carousel.dataset.backgroundIndex ?? "0");
+			const nextIndex = (currentIndex + direction + images.length) % images.length;
+
+			carousel.dataset.backgroundIndex = String(nextIndex);
+			images.forEach((image, imageIndex) => {
+				image.classList.toggle("opacity-100", imageIndex === nextIndex);
+				image.classList.toggle("opacity-0", imageIndex !== nextIndex);
+			});
+		});
+	}
+
+	const dragWindow = window as Window & {
+		rawrGlassDragReadyV2?: boolean;
+		rawrGlassControlsReadyV3?: boolean;
+	};
+
+	if (!dragWindow.rawrGlassControlsReadyV3) {
+		dragWindow.rawrGlassControlsReadyV3 = true;
+
+		const syncCodeExamples = (demo: HTMLElement) => {
+			const finish = demo.dataset.glassFinish ?? "4";
+			const tint = demo.dataset.glassTint ?? "white";
+			const lens = demo.dataset.glassLens ?? "fisheye";
+
+			demo.querySelectorAll<HTMLElement>("[role='tabpanel'] code").forEach((code) => {
+				const current = code.textContent ?? "";
+				const updated = current
+					.replaceAll(/frosted="[^"]*"/g, `frosted="${finish}"`)
+					.replaceAll(/frosted-tint="[^"]*"/g, `frosted-tint="${tint}"`)
+					.replaceAll(/interior-lens="[^"]*"/g, `interior-lens="${lens}"`)
+					.replaceAll(/frosted=\{[^}]*\}/g, `frosted={${finish}}`)
+					.replaceAll(/frostedTint="[^"]*"/g, `frostedTint="${tint}"`)
+					.replaceAll(/interiorLens="[^"]*"/g, `interiorLens="${lens}"`)
+					.replaceAll(/frosted:\s*[\d.]+/g, `frosted: ${finish}`)
+					.replaceAll(/frostedTint:\s*"[^"]*"/g, `frostedTint: "${tint}"`)
+					.replaceAll(/interiorLens:\s*"[^"]*"/g, `interiorLens: "${lens}"`);
+
+				if (updated !== current) {
+					code.textContent = updated;
+				}
+			});
+		};
+
+		document.addEventListener("click", (event) => {
+			const target = event.target;
+
+			if (!(target instanceof Element)) {
+				return;
+			}
+
+			const control = target.closest<HTMLButtonElement>("[data-glass-control]");
+
+			if (!control) {
+				return;
+			}
+
+			const demo = control.closest<HTMLElement>("[data-component-demo]");
+			const surface = demo?.querySelector<HTMLElement>("liquid-glass-surface");
+			const group = control.dataset.glassControl;
+			const value = control.dataset.glassValue;
+
+			if (!demo || !surface || !group || !value) {
+				return;
+			}
+
+			if (group === "finish") {
+				demo.dataset.glassFinish = value;
+			}
+
+			if (group === "tint") {
+				demo.dataset.glassTint = value;
+			}
+
+			if (group === "lens") {
+				demo.dataset.glassLens = value;
+			}
+
+			surface.setAttribute("frosted", demo.dataset.glassFinish ?? "4");
+			surface.setAttribute("frosted-tint", demo.dataset.glassTint ?? "white");
+			surface.setAttribute("interior-lens", demo.dataset.glassLens ?? "fisheye");
+			syncCodeExamples(demo);
+
+			demo
+				.querySelectorAll<HTMLButtonElement>(`[data-glass-control="${group}"]`)
+				.forEach((button) => {
+					button.setAttribute("aria-pressed", String(button === control));
+				});
+		});
+	}
+
+	if (!dragWindow.rawrGlassDragReadyV2) {
+		dragWindow.rawrGlassDragReadyV2 = true;
+
+		let dragState:
+			| {
+					element: HTMLElement;
+					canvas: HTMLElement;
+					offsetX: number;
+					offsetY: number;
+					width: number;
+					height: number;
+			  }
+			| null = null;
+
+		const clamp = (value: number, min: number, max: number) =>
+			Math.max(min, Math.min(value, max));
+
+		document.addEventListener("pointerdown", (event) => {
+			const target = event.target;
+
+			if (!(target instanceof Element)) {
+				return;
+			}
+
+			const draggable = target.closest<HTMLElement>("[data-draggable-glass]");
+
+			if (!draggable) {
+				return;
+			}
+
+			const canvas = draggable.closest<HTMLElement>("[data-demo-canvas]");
+
+			if (!canvas) {
+				return;
+			}
+
+			const draggableRect = draggable.getBoundingClientRect();
+			const canvasRect = canvas.getBoundingClientRect();
+
+			dragState = {
+				element: draggable,
+				canvas,
+				offsetX: event.clientX - draggableRect.left,
+				offsetY: event.clientY - draggableRect.top,
+				width: draggableRect.width,
+				height: draggableRect.height,
+			};
+
+			draggable.setPointerCapture(event.pointerId);
+			draggable.style.width = `${draggableRect.width}px`;
+			draggable.style.height = `${draggableRect.height}px`;
+			draggable.style.right = "auto";
+			draggable.style.transform = "none";
+			draggable.style.left = `${draggableRect.left - canvasRect.left}px`;
+			draggable.style.top = `${draggableRect.top - canvasRect.top}px`;
+		});
+
+		document.addEventListener("pointermove", (event) => {
+			if (!dragState) {
+				return;
+			}
+
+			const canvasRect = dragState.canvas.getBoundingClientRect();
+			const left = clamp(
+				event.clientX - canvasRect.left - dragState.offsetX,
+				0,
+				Math.max(0, canvasRect.width - dragState.width),
+			);
+			const top = clamp(
+				event.clientY - canvasRect.top - dragState.offsetY,
+				0,
+				Math.max(0, canvasRect.height - dragState.height),
+			);
+
+			dragState.element.style.left = `${left}px`;
+			dragState.element.style.top = `${top}px`;
+		});
+
+		document.addEventListener("pointerup", () => {
+			dragState = null;
+		});
+
+		document.addEventListener("pointercancel", () => {
+			dragState = null;
+		});
+	}
+</script>
