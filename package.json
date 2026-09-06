@@ -1,5 +1,5 @@
 {
-	"name": "@rawr-labs/visual-components",
+	"name": "@rawr-labs/liquid-glass",
 	"version": "0.1.0",
 	"description": "Framework-agnostic Rawr Labs visual components with thin Astro and React wrappers.",
 	"license": "MIT",
@@ -15,9 +15,12 @@
 	"files": [
 		"dist",
 		"README.md",
-		"LICENSE",
-		".agents"
+		"LICENSE"
 	],
+	"publishConfig": {
+		"access": "public",
+		"registry": "https://registry.npmjs.org/"
+	},
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",

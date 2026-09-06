@@ -12,6 +12,33 @@ Component source lives in dedicated folders under `src/components/`. The Astro d
 pnpm add @rawr-labs/visual-components
 ```
 
+## Local development and release preparation
+
+The documentation site imports the same public package exports that consumers use. Build the package before starting the site so local changes to the Liquid Glass core are reflected in `dist`:
+
+```sh
+pnpm install
+pnpm build
+pnpm dev
+```
+
+Before a release, run the checks and inspect the exact archive that would be uploaded:
+
+```sh
+pnpm typecheck
+pnpm test
+pnpm build
+pnpm site:build
+pnpm pack --dry-run
+pnpm publish --dry-run
+```
+
+The package is configured for public publication to the npm registry. Once you have selected a new version and logged in with an account that can publish the `@rawr-labs` scope, publish with:
+
+```sh
+pnpm publish
+```
+
 ## Plain Custom Element
 
 Import the self-registering core entry and the CSS:

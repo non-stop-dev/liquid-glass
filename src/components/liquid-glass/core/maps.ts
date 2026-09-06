@@ -394,7 +394,9 @@ function filledLensOffset(
 	const centeredY = (y - height / 2) / Math.max(height / 2, 1);
 	const radialDistance = Math.hypot(centeredX, centeredY);
 	const safeDistance = radialDistance || 1;
-	const edgeRelease = smootherstep(0, Math.max(1, bezel), distanceInside);
+	// Keep only a one-pixel neutral seam at the clip boundary. Using the full
+	// bezel here made refraction appear to start late, especially under Frosted blur.
+	const edgeRelease = smootherstep(0, 1, distanceInside);
 	const centerRelax = 1 - 0.1 * smootherstep(0.88, 1, Math.min(radialDistance, 1));
 	const strength = edgeRelease * centerRelax;
 	const interiorBlend =

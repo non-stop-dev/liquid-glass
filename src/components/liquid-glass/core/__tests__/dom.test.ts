@@ -108,8 +108,9 @@ describe("liquid glass rendering lifecycle", () => {
 	it("preserves nodes and observer, batches geometry changes, and skips maps for tint or identical values", async () => {
 		defineLiquidGlassElement();
 		const host = document.createElement("liquid-glass-surface");
+		const hostSetProperty = vi.spyOn(host.style, "setProperty");
 		document.body.append(host);
-		const surface = host.querySelector(".liquid-glass");
+		const surface = host.querySelector<HTMLElement>(".liquid-glass");
 		const svg = host.querySelector("svg");
 		vi.mocked(createLiquidGlassMaps).mockClear();
 		host.setAttribute("radius", "2");
@@ -117,12 +118,18 @@ describe("liquid glass rendering lifecycle", () => {
 		await Promise.resolve();
 		expect(createLiquidGlassMaps).toHaveBeenCalledOnce();
 		expect(createLiquidGlassMaps).toHaveBeenLastCalledWith(expect.objectContaining({ radius: 2, bezel: 3 }));
+		expect(hostSetProperty).toHaveBeenCalledWith("backdrop-filter", expect.stringMatching(/^url\("#liquid-glass-\d+-filter"\)/));
+		expect(host.style.getPropertyValue("backdrop-filter")).not.toContain("blur(");
+		expect(host.style.getPropertyValue("will-change")).toBe("backdrop-filter");
+		expect(surface?.style.getPropertyValue("backdrop-filter")).toBe("");
+		expect(svg?.querySelector("[data-liquid-glass-frosted-blur]")?.getAttribute("stdDeviation")).toBe("0.25");
 		vi.mocked(createLiquidGlassMaps).mockClear();
 		host.setAttribute("radius", "2");
 		host.setAttribute("frosted", "7");
 		host.setAttribute("frosted-tint", "black");
 		await Promise.resolve();
 		expect(createLiquidGlassMaps).not.toHaveBeenCalled();
+		expect(svg?.querySelector("[data-liquid-glass-frosted-blur]")?.getAttribute("stdDeviation")).toBe("5.5");
 		expect(host.querySelector(".liquid-glass")).toBe(surface);
 		expect(host.querySelector("svg")).toBe(svg);
 		expect(observe).toHaveBeenCalledOnce();

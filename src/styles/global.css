@@ -75,6 +75,34 @@
 		outline-offset: 3px;
 	}
 
+	.liquid-action-bounce {
+		animation: liquid-action-bounce 320ms cubic-bezier(0.22, 1, 0.36, 1);
+	}
+
+	@keyframes liquid-action-bounce {
+		0% {
+			transform: scale(0.95);
+		}
+
+		45% {
+			transform: scale(1.06);
+		}
+
+		100% {
+			transform: scale(1);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.liquid-action-button {
+			transition: none;
+		}
+
+		.liquid-action-bounce {
+			animation: none;
+		}
+	}
+
 	.code-tab[aria-selected="true"] {
 		background: rgb(63 231 203 / 18%);
 		color: white;

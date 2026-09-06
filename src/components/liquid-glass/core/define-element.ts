@@ -27,7 +27,7 @@ export function defineLiquidGlassElement(): void {
 				this.replaceChildren(svg, this.#surface);
 			}
 			this.#syncAttributes();
-			this.#controller = mountLiquidGlassSurface(this.#surface);
+			this.#controller = mountLiquidGlassSurface(this.#surface, this);
 		}
 
 		disconnectedCallback(): void {
@@ -69,6 +69,7 @@ function createSvgFilter(filterId: string, mapId: string): SVGSVGElement {
 	const defs = document.createElementNS(svgNamespace, "defs");
 	const filter = document.createElementNS(svgNamespace, "filter");
 	const feImage = document.createElementNS(svgNamespace, "feImage");
+	const frostedBlur = document.createElementNS(svgNamespace, "feGaussianBlur");
 	const displacement = document.createElementNS(svgNamespace, "feDisplacementMap");
 
 	svg.classList.add("liquid-glass__svg");
@@ -97,14 +98,19 @@ function createSvgFilter(filterId: string, mapId: string): SVGSVGElement {
 	feImage.setAttribute("result", mapId);
 	feImage.setAttribute("data-liquid-glass-displacement-image", "");
 
-	displacement.setAttribute("in", "SourceGraphic");
+	frostedBlur.setAttribute("in", "SourceGraphic");
+	frostedBlur.setAttribute("stdDeviation", "0.25");
+	frostedBlur.setAttribute("result", `${filterId}-frosted-source`);
+	frostedBlur.setAttribute("data-liquid-glass-frosted-blur", "");
+
+	displacement.setAttribute("in", `${filterId}-frosted-source`);
 	displacement.setAttribute("in2", mapId);
 	displacement.setAttribute("scale", "44");
 	displacement.setAttribute("xChannelSelector", "R");
 	displacement.setAttribute("yChannelSelector", "G");
 	displacement.setAttribute("data-liquid-glass-displacement-map", "");
 
-	filter.append(feImage, displacement);
+	filter.append(feImage, frostedBlur, displacement);
 	defs.append(filter);
 	svg.append(defs);
 

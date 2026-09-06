@@ -3,8 +3,10 @@ import type { LiquidGlassEdge, LiquidGlassEdges, LiquidGlassInteriorLens, Liquid
 
 interface LiquidGlassSurfaceElements {
 	surface: HTMLElement;
+	host: HTMLElement;
 	filter: Element;
 	feImage: SVGFEImageElement;
+	frostedBlur: SVGFEGaussianBlurElement | null;
 	displacement: SVGFEDisplacementMapElement;
 }
 
@@ -13,16 +15,17 @@ export interface LiquidGlassSurfaceController {
 	destroy: () => void;
 }
 
-export function mountLiquidGlassSurface(surface: HTMLElement): LiquidGlassSurfaceController | null {
+export function mountLiquidGlassSurface(surface: HTMLElement, host = surface): LiquidGlassSurfaceController | null {
 	const filter = document.getElementById(surface.dataset.liquidGlassFilterId ?? "");
 	const feImage = filter?.querySelector<SVGFEImageElement>("[data-liquid-glass-displacement-image]");
+	const frostedBlur = filter?.querySelector<SVGFEGaussianBlurElement>("[data-liquid-glass-frosted-blur]") ?? null;
 	const displacement = filter?.querySelector<SVGFEDisplacementMapElement>("[data-liquid-glass-displacement-map]");
 	if (!filter || filter.localName !== "filter" || !feImage || !displacement) {
-		setFallback(surface, "missing-filter");
+		setFallback(surface, "missing-filter", host);
 		reportError(surface, new Error("Liquid Glass filter elements are missing. Mount the complete SVG filter and surface together."));
 		return null;
 	}
-	const elements = { surface, filter, feImage, displacement };
+	const elements = { surface, host, filter, feImage, frostedBlur, displacement };
 	const update = (geometryChanged = true) => updateLiquidGlassSurface(elements, geometryChanged);
 	const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(() => update());
 	observer?.observe(surface);
@@ -31,7 +34,7 @@ export function mountLiquidGlassSurface(surface: HTMLElement): LiquidGlassSurfac
 }
 
 function updateLiquidGlassSurface(elements: LiquidGlassSurfaceElements, geometryChanged: boolean): void {
-	const { surface } = elements;
+	const { surface, host } = elements;
 	applyFrostedStyles(surface);
 	if (!geometryChanged && surface.dataset.liquidGlassReady === "true") {
 		applyBackdrop(elements);
@@ -41,14 +44,16 @@ function updateLiquidGlassSurface(elements: LiquidGlassSurfaceElements, geometry
 	const options = readSurfaceOptions(surface, rect.width, rect.height);
 	const radius = resolveRadius(rect.width, rect.height, options.radius, options.shape);
 	surface.style.setProperty("--liquid-glass-radius", `${radius}px`);
+	host.style.setProperty("--liquid-glass-radius", `${radius}px`);
 	// A circle is inscribed in its box, including when the host is not square.
 	surface.style.clipPath = options.shape === "circle" ? `circle(${radius}px at 50% 50%)` : "";
+	host.style.clipPath = options.shape === "circle" ? `circle(${radius}px at 50% 50%)` : "";
 	if (rect.width < 1 || rect.height < 1) {
-		setFallback(surface, "zero-size");
+		setFallback(surface, "zero-size", host);
 		return;
 	}
 	if (!supportsSvgBackdropFilter()) {
-		setFallback(surface, "unsupported-browser");
+		setFallback(surface, "unsupported-browser", host);
 		return;
 	}
 	try {
@@ -63,13 +68,14 @@ function updateLiquidGlassSurface(elements: LiquidGlassSurfaceElements, geometry
 		elements.feImage.setAttribute("height", height);
 		elements.displacement.setAttribute("scale", String(maps.displacementScale));
 		surface.style.setProperty("--liquid-glass-radius", `${maps.radius}px`);
+		host.style.setProperty("--liquid-glass-radius", `${maps.radius}px`);
 		applyBackdrop(elements);
 		// Ready means the map and filter are installed, not a pixel-level rendering probe.
 		surface.dataset.liquidGlassReady = "true";
 		delete surface.dataset.liquidGlassFallback;
 		delete surface.dataset.liquidGlassFallbackReason;
 	} catch (cause) {
-		setFallback(surface, "generation-failed");
+		setFallback(surface, "generation-failed", host);
 		reportError(surface, new Error("Liquid Glass map generation failed. Check canvas availability and the surface dimensions, then retry update().", { cause }));
 	}
 }
@@ -78,27 +84,36 @@ function applyFrostedStyles(surface: HTMLElement): void {
 	const frosted = readFrosted(surface);
 	surface.style.setProperty("--liquid-glass-frosted-tint", surface.dataset.liquidGlassFrostedTint === "black" ? "0 0 0" : "255 255 255");
 	surface.style.setProperty("--liquid-glass-frosted-alpha", String(0.05 + frosted * 0.035));
-	surface.style.setProperty("--liquid-glass-frosted-blur", `${0.25 + frosted * 0.75}px`);
+	surface.style.setProperty("--liquid-glass-frosted-blur", `${resolveFrostedBlur(frosted)}px`);
 	surface.style.setProperty("--liquid-glass-frosted-saturate", String(Math.max(0.86, 1.12 - frosted * 0.026)));
 }
 
-function applyBackdrop({ surface, filter }: LiquidGlassSurfaceElements): void {
+function applyBackdrop(elements: LiquidGlassSurfaceElements): void {
+	const { surface, host, filter, frostedBlur } = elements;
 	const frosted = readFrosted(surface);
+	const blur = resolveFrostedBlur(frosted);
 	const value = [
 		`url("#${filter.id}")`,
-		`blur(${formatCssNumber(0.25 + frosted * 0.75)}px)`,
+		...(frostedBlur ? [] : [`blur(${formatCssNumber(blur)}px)`]),
 		`contrast(${formatCssNumber(1.18 - frosted * 0.018)})`,
 		`brightness(${formatCssNumber(1.08 - frosted * 0.006)})`,
 		`saturate(${formatCssNumber(Math.max(0.86, 1.12 - frosted * 0.026))})`,
 	].join(" ");
-	surface.style.setProperty("backdrop-filter", value);
-	surface.style.setProperty("-webkit-backdrop-filter", value);
-	surface.dataset.liquidGlassSvgBackdrop = "true";
+	// Blur the backdrop before displacement so Frosted does not wash out the
+	// refraction at the clip edge. Older manually-authored filters can omit the
+	// node and retain the CSS fallback behavior.
+	frostedBlur?.setAttribute("stdDeviation", formatCssNumber(blur));
+	// Keep the fixed backdrop layer live while the page scrolls. Chromium can otherwise
+	// delay repainting a URL-backed backdrop filter until the next scroll step.
+	host.style.setProperty("will-change", "backdrop-filter");
+	host.style.setProperty("backdrop-filter", value);
+	host.style.setProperty("-webkit-backdrop-filter", value);
 }
 
-function setFallback(surface: HTMLElement, reason: string): void {
-	surface.style.removeProperty("backdrop-filter");
-	surface.style.removeProperty("-webkit-backdrop-filter");
+function setFallback(surface: HTMLElement, reason: string, host = surface): void {
+	host.style.removeProperty("will-change");
+	host.style.removeProperty("backdrop-filter");
+	host.style.removeProperty("-webkit-backdrop-filter");
 	delete surface.dataset.liquidGlassReady;
 	delete surface.dataset.liquidGlassSvgBackdrop;
 	surface.dataset.liquidGlassFallback = "true";
@@ -153,6 +168,10 @@ function readRadius(surface: HTMLElement): LiquidGlassRadius {
 
 function readFrosted(surface: HTMLElement): number {
 	return readControl(surface.dataset.liquidGlassFrosted, 0);
+}
+
+function resolveFrostedBlur(frosted: number): number {
+	return 0.25 + frosted * 0.75;
 }
 
 function readInteriorLens(surface: HTMLElement): LiquidGlassInteriorLens {

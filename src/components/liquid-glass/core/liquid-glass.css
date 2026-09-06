@@ -2,16 +2,21 @@ liquid-glass-surface {
 	position: absolute;
 	inset: 0;
 	display: block;
+	isolation: isolate;
+	overflow: hidden;
+	border-radius: var(--liquid-glass-radius, 0px);
 	pointer-events: none;
 }
 
 liquid-glass-surface .liquid-glass {
 	position: absolute;
 	inset: 0;
-	isolation: isolate;
 	overflow: hidden;
 	border-radius: var(--liquid-glass-radius);
 	pointer-events: none;
+}
+
+liquid-glass-surface .liquid-glass[data-liquid-glass-fallback="true"] {
 	backdrop-filter: blur(var(--liquid-glass-frosted-blur))
 		saturate(var(--liquid-glass-frosted-saturate));
 	-webkit-backdrop-filter: blur(var(--liquid-glass-frosted-blur))

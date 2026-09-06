@@ -87,6 +87,15 @@ describe("liquid glass map controls", () => {
 		}
 	});
 
+	it("starts filled refraction immediately inside the clip boundary", () => {
+		const { image } = captureDisplacementMap({
+			width: 120, height: 60, shape: "rounded-rect", radius: 0,
+			bezel: 0.5, activeEdges: "all", dpr: 1, scale: 4, fillRefraction: true,
+		});
+		expect(channelAt(image, 60, 0, 1)).toBe(128);
+		expect(channelAt(image, 60, 1, 1)).toBeGreaterThan(128);
+	});
+
 	it.each([[1200, 300], [300, 1200], [8, 1000], [1000, 8]])("bounds raster work and preserves aspect ratio for %s x %s", (width, height) => {
 		const { maps } = captureDisplacementMap({
 			width, height, shape: "rounded-rect", radius: 2,

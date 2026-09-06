@@ -1,9 +1,14 @@
-import { cp, mkdir } from "node:fs/promises";
+import { cp, mkdir, rm } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { existsSync } from "node:fs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+
+// The TypeScript build only emits library files. Remove output from older
+// builds so the published tarball cannot retain documentation helpers.
+await rm(resolve(root, "dist/components/site"), { recursive: true, force: true });
+await rm(resolve(root, "dist/.agents"), { recursive: true, force: true });
 
 const copyTargets = [
 	{
@@ -17,10 +22,6 @@ const copyTargets = [
 	{
 		from: "src/components/liquid-glass/astro/LiquidGlassSurface.astro.d.ts",
 		to: "dist/components/liquid-glass/astro/LiquidGlassSurface.astro.d.ts",
-	},
-	{
-		from: ".agents/skills/liquid-glass",
-		to: "dist/.agents/skills/liquid-glass",
 	},
 ];
 

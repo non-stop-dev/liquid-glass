@@ -5,6 +5,11 @@
 		"rootDir": "src",
 		"outDir": "dist"
 	},
-	"include": ["src/index.ts", "src/components/**/*.ts", "src/components/**/*.tsx", "src/global.d.ts"],
+	"include": [
+		"src/index.ts",
+		"src/components/liquid-glass/**/*.ts",
+		"src/components/liquid-glass/**/*.tsx",
+		"src/global.d.ts"
+	],
 	"exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/**/__tests__/**"]
 }

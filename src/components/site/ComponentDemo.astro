@@ -1,6 +1,6 @@
 ---
 import { ChevronLeft, ChevronRight } from "@lucide/astro";
-import LiquidGlassSurface from "../liquid-glass/astro/LiquidGlassSurface.astro";
+import { LiquidGlassSurface } from "@rawr-labs/visual-components/astro";
 import CodeTabs from "./CodeTabs.astro";
 
 interface Props {
@@ -280,22 +280,56 @@ export function ${variant === "nav" ? "NavigationSurface" : variant === "card" ?
 			<div class="absolute inset-0 bg-gradient-to-br from-primary/18 via-ink/14 to-secondary/18"></div>
 		</div>
 		<div class="absolute left-4 top-4 z-30 flex gap-2">
-			<button
-				type="button"
-				class="focus-ring grid size-10 place-items-center rounded-full border border-white/16 bg-black/45 text-white backdrop-blur-md transition hover:border-primary/60 hover:text-primary"
-				aria-label={`Previous background for ${title}`}
-				data-background-previous
-			>
-				<ChevronLeft size={20} stroke-width={2.4} aria-hidden="true" />
-			</button>
-			<button
-				type="button"
-				class="focus-ring grid size-10 place-items-center rounded-full border border-white/16 bg-black/45 text-white backdrop-blur-md transition hover:border-primary/60 hover:text-primary"
-				aria-label={`Next background for ${title}`}
-				data-background-next
-			>
-				<ChevronRight size={20} stroke-width={2.4} aria-hidden="true" />
-			</button>
+			<div class="relative grid size-10 shrink-0">
+				<LiquidGlassSurface
+					id={`${id}-previous-action`}
+					class="absolute inset-0"
+					shape="circle"
+					radius={10}
+					bezel={0.5}
+					scale={3}
+					activeEdges="all"
+					fillRefraction
+					interiorLens="fisheye"
+					deformationX={2}
+					deformationY={2}
+					frosted={3}
+					frostedTint="white"
+				/>
+				<button
+					type="button"
+					class="liquid-action-button focus-ring relative z-10 grid size-10 place-items-center rounded-full border border-white/16 text-white transition-transform duration-200 ease-out hover:scale-105 active:scale-95"
+					aria-label={`Previous background for ${title}`}
+					data-background-previous
+				>
+					<ChevronLeft size={20} stroke-width={2.4} aria-hidden="true" />
+				</button>
+			</div>
+			<div class="relative grid size-10 shrink-0">
+				<LiquidGlassSurface
+					id={`${id}-next-action`}
+					class="absolute inset-0"
+					shape="circle"
+					radius={10}
+					bezel={0.5}
+					scale={3}
+					activeEdges="all"
+					fillRefraction
+					interiorLens="fisheye"
+					deformationX={2}
+					deformationY={2}
+					frosted={3}
+					frostedTint="white"
+				/>
+				<button
+					type="button"
+					class="liquid-action-button focus-ring relative z-10 grid size-10 place-items-center rounded-full border border-white/16 text-white transition-transform duration-200 ease-out hover:scale-105 active:scale-95"
+					aria-label={`Next background for ${title}`}
+					data-background-next
+				>
+					<ChevronRight size={20} stroke-width={2.4} aria-hidden="true" />
+				</button>
+			</div>
 		</div>
 		<p class="absolute bottom-4 left-4 z-20 rounded-md bg-black/45 px-3 py-2 text-xs font-bold text-white/72 backdrop-blur-md">
 			Drag the glass surface across the background
@@ -506,6 +540,24 @@ export function ${variant === "nav" ? "NavigationSurface" : variant === "card" ?
 				return;
 			}
 
+			const actionButton = target.closest<HTMLButtonElement>(
+				"[data-background-previous], [data-background-next]",
+			);
+
+			if (
+				actionButton &&
+				!window.matchMedia("(prefers-reduced-motion: reduce)").matches
+			) {
+				actionButton.classList.remove("liquid-action-bounce");
+				void actionButton.offsetWidth;
+				actionButton.classList.add("liquid-action-bounce");
+				actionButton.addEventListener(
+					"animationend",
+					() => actionButton.classList.remove("liquid-action-bounce"),
+					{ once: true },
+				);
+			}
+
 			const direction = previous ? -1 : 1;
 			const currentIndex = Number(carousel.dataset.backgroundIndex ?? "0");
 			const nextIndex = (currentIndex + direction + images.length) % images.length;
@@ -532,6 +584,16 @@ export function ${variant === "nav" ? "NavigationSurface" : variant === "card" ?
 			return String(Math.round(clampedValue * 10) / 10);
 		};
 
+		const getDemoSurface = (demo: HTMLElement | null) => {
+			const surfaceId = demo?.dataset.componentDemo;
+
+			return surfaceId
+				? demo?.querySelector<HTMLElement>(
+						`liquid-glass-surface#${CSS.escape(surfaceId)}`,
+					)
+				: null;
+		};
+
 		const syncCodeExamples = (demo: HTMLElement) => {
 			const radius = demo.dataset.glassRadius ?? "10";
 			const bezel = demo.dataset.glassBezel ?? "0.5";
@@ -552,7 +614,7 @@ export function ${variant === "nav" ? "NavigationSurface" : variant === "card" ?
 
 		const updateRangeControl = (range: HTMLInputElement) => {
 			const demo = range.closest<HTMLElement>("[data-component-demo]");
-			const surface = demo?.querySelector<HTMLElement>("liquid-glass-surface");
+			const surface = getDemoSurface(demo);
 			const key = range.dataset.glassRange;
 			const attribute = range.dataset.glassAttribute;
 			const value = normalizeControl(range.value);
@@ -583,7 +645,7 @@ export function ${variant === "nav" ? "NavigationSurface" : variant === "card" ?
 			}
 
 			const demo = control.closest<HTMLElement>("[data-component-demo]");
-			const surface = demo?.querySelector<HTMLElement>("liquid-glass-surface");
+			const surface = getDemoSurface(demo);
 			const group = control.dataset.glassControl;
 			const value = control.dataset.glassValue;
 
