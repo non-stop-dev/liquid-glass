@@ -11,6 +11,7 @@ on:
       - 'tsconfig.build.json'
       - 'package.json'
       - 'pnpm-lock.yaml'
+      - 'README.md'
       - '.github/workflows/staging.yml'
   workflow_dispatch:
 
