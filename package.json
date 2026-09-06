@@ -1,18 +1,18 @@
 {
-	"name": "@rawr-labs/liquid-glass",
+	"name": "@non-stop-dev/liquid-glass",
 	"version": "0.1.0",
-	"description": "Framework-agnostic Rawr Labs visual components with thin Astro and React wrappers.",
+	"description": "Framework-agnostic visual components with thin Astro and React wrappers.",
 	"license": "MIT",
 	"type": "module",
 	"private": false,
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/rawr-labs/liquid-glass.git"
+		"url": "git+https://github.com/non-stop-dev/liquid-glass.git"
 	},
 	"bugs": {
-		"url": "https://github.com/rawr-labs/liquid-glass/issues"
+		"url": "https://github.com/non-stop-dev/liquid-glass/issues"
 	},
-	"homepage": "https://github.com/rawr-labs/liquid-glass#readme",
+	"homepage": "https://github.com/non-stop-dev/liquid-glass#readme",
 	"sideEffects": [
 		"**/*.css",
 		"dist/components/liquid-glass/index.js",
