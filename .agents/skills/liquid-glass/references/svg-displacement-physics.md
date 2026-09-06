@@ -10,7 +10,6 @@
 - Shape Field And Normals
 - Convex Lens Sampling
 - Bezel-Only Versus Filled Lens
-- Rim And Specular Highlights
 - Runtime Generation
 - Properties
 - Code Patterns
@@ -307,39 +306,6 @@ Result:
 - The object reads as a single filled lens.
 - Needs careful edge ramping to avoid permanent corner artifacts.
 
-## Specular Highlight
-
-Specular maps are optional and should never be confused with refraction. Generate them from the same normal field. The Apple-style model is a rim light: highlight intensity is strongest where the edge normal faces a fixed light direction, then fades around the object.
-
-```ts
-function specularAlpha(normalX: number, normalY: number, progress: number): number {
-  const rimBand = smootherstep(0, 0.16, progress) * (1 - smootherstep(0.74, 1, progress));
-  const lightX = -0.48;
-  const lightY = -0.88;
-  const facingLight = Math.max(0, normalX * lightX + normalY * lightY);
-  const oppositeCatch = Math.max(0, normalX * -lightX + normalY * -lightY);
-  const rimLight = 0.05 + facingLight ** 2.35 * 0.78 + oppositeCatch ** 5 * 0.1;
-  return Math.min(0.72, rimBand * rimLight);
-}
-```
-
-Result:
-
-- Highlight follows the actual lens geometry.
-- Brightness changes with normal angle relative to the fixed light direction.
-- Highlight can be disabled with `specularHighlight={false}` or `specular-highlight="false"`.
-
-Avoid:
-
-```css
-box-shadow: inset 0 -20px 30px rgb(255 255 255 / 30%);
-```
-
-Result:
-
-- Static reflection never changes with the backdrop.
-- Users perceive it as a hardcoded artifact.
-
 ## Runtime Generation
 
 Use `ResizeObserver` and cache by geometry:
@@ -352,7 +318,6 @@ const cacheKey = [
   radius,
   bezel,
   activeEdges,
-  specularHighlight,
   scale,
   dprBucket,
   fillRefraction ? "filled" : "bezel",
@@ -387,8 +352,6 @@ Public numeric controls use a normalized `0-10` scale and are rounded to one dec
 `scale`: Normalized `0-10` base displacement intensity. Internally maps to about `20-80px` before per-mode axis multipliers and runtime clamping.
 
 `activeEdges`: `"all"`, `"none"`, or selected edges. Use `"all"` for normal glass. Use one edge for border-only effects.
-
-`specularHighlight`: `true` or `false` for the normal-based shine layer. Use `false` when highlights distract from backdrop refraction.
 
 `fillRefraction`: `false` for bezel-only refraction; `true` for one filled convex lens.
 
@@ -503,7 +466,7 @@ Result:
 Permanent corner crescents:
 
 - Cause: outward sampling across rounded clipped boundaries, nonzero displacement at the exact edge, or static rim/shadow overlay.
-- Fix: flip sampling inward, make edge magnitude start at `0`, disable `specularHighlight`, reduce bezel, and ensure `overflow: hidden` and matching radius.
+- Fix: flip sampling inward, make edge magnitude start at `0`, reduce bezel, and ensure `overflow: hidden` and matching radius.
 
 Top/bottom do not refract until content reaches center:
 

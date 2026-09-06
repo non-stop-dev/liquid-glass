@@ -10,7 +10,6 @@ describe("LiquidGlassSurface React props", () => {
 			bezel: 1,
 			scale: 4.3,
 			activeEdges: ["top", "bottom"],
-			specularHighlight: false,
 			fillRefraction: true,
 			interiorLens: "fisheye",
 			deformationX: 3,

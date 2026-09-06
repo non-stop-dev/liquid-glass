@@ -15,7 +15,7 @@ const coreDir = resolve(currentDir, "..");
 describe("liquid glass custom element contract", () => {
 	it("uses the expected custom element name and observes current public attributes", () => {
 		expect(liquidGlassElementName).toBe("liquid-glass-surface");
-		expect(observedLiquidGlassAttributes).toContain("specular-highlight");
+		expect(observedLiquidGlassAttributes).not.toContain("specular-highlight");
 		expect(observedLiquidGlassAttributes).toContain("deformation-x");
 		expect(observedLiquidGlassAttributes).toContain("deformation-y");
 	});
@@ -26,6 +26,7 @@ describe("liquid glass custom element contract", () => {
 			readFileSync(resolve(coreDir, "define-element.ts"), "utf8"),
 			readFileSync(resolve(coreDir, "dom.ts"), "utf8"),
 			readFileSync(resolve(coreDir, "maps.ts"), "utf8"),
+			readFileSync(resolve(coreDir, "map-raster.ts"), "utf8"),
 			readFileSync(resolve(coreDir, "liquid-glass.css"), "utf8"),
 		].join("\n");
 		const blockedTerms = [
@@ -45,10 +46,6 @@ describe("liquid glass custom element contract", () => {
 
 		expect(implementation).toContain("backdrop-filter");
 		expect(implementation).toContain("feDisplacementMap");
-		expect(implementation).toContain("--liquid-glass-specular-mask");
-		expect(implementation).toContain("mask-image");
-		expect(implementation).toContain("-webkit-mask-image");
-		expect(implementation).toContain("liquid-glass-specular-sweep");
-		expect(implementation).toContain("prefers-reduced-motion");
+		expect(implementation).not.toMatch(/specular/i);
 	});
 });

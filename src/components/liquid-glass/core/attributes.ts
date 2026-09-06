@@ -7,7 +7,6 @@ export const liquidGlassAttributeNames = [
 	"bezel",
 	"scale",
 	"active-edges",
-	"specular-highlight",
 	"fill-refraction",
 	"interior-lens",
 	"deformation-x",
@@ -45,13 +44,6 @@ export function liquidGlassPropsToAttributes(
 		props.activeEdges === undefined
 			? undefined
 			: serializeLiquidGlassEdges(props.activeEdges),
-	);
-	assignAttribute(
-		attributes,
-		"specular-highlight",
-		props.specularHighlight === undefined
-			? undefined
-			: String(props.specularHighlight),
 	);
 	assignAttribute(
 		attributes,

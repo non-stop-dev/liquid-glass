@@ -17,8 +17,7 @@ Use this skill when implementing or fixing a liquid glass surface that should re
 6. Use a rounded-rect/circle signed-distance field to derive surface normals.
 7. For convex glass, sample inward from the surface into the body of the glass; avoid outward sampling at clipped edges.
 8. Set edge displacement to zero at the exact boundary, ramp it in over the bezel, and fade it smoothly through the lens body.
-9. Use optional `specularHighlight` overlays only when they are generated from the same normal field and do not create fixed artifacts.
-10. Verify in browser with high-contrast content crossing top, bottom, sides, corners, and center.
+9. Verify in browser with high-contrast content crossing top, bottom, sides, corners, and center.
 
 ## Non-Negotiables
 

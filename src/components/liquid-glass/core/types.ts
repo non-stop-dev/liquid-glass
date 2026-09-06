@@ -14,9 +14,6 @@ export type LiquidGlassEdges =
 	| LiquidGlassEdge
 	| readonly LiquidGlassEdge[];
 
-/** Enables or disables the generated normal-based rim highlight. */
-export type LiquidGlassSpecularHighlight = boolean;
-
 /** Interior lens deformation model. */
 export type LiquidGlassInteriorLens = "linear" | "fisheye";
 
@@ -30,7 +27,7 @@ export type LiquidGlassFrostedTint = "black" | "white";
 export type LiquidGlassControl = number;
 
 export interface LiquidGlassProps {
-	/** Stable id used to link the SVG filter and backdrop-filter. */
+	/** Stable DOM id for the custom element host. Internal filter ids are generated independently. */
 	id: string;
 
 	/** Lens geometry. "rounded-rect" works for pills/cards; "circle" for round buttons. */
@@ -47,9 +44,6 @@ export interface LiquidGlassProps {
 
 	/** Which edges participate in refraction. */
 	activeEdges?: LiquidGlassEdges;
-
-	/** When true, renders a generated normal-based specular rim highlight. */
-	specularHighlight?: LiquidGlassSpecularHighlight;
 
 	/** When true, the whole surface participates in refraction instead of bezel only. */
 	fillRefraction?: boolean;
@@ -77,7 +71,6 @@ export interface LiquidGlassMapOptions {
 	radius: LiquidGlassRadius;
 	bezel: number;
 	activeEdges: LiquidGlassEdges;
-	specularHighlight: LiquidGlassSpecularHighlight;
 	dpr: number;
 	scale: number;
 	fillRefraction?: boolean;
@@ -88,7 +81,6 @@ export interface LiquidGlassMapOptions {
 
 export interface LiquidGlassMaps {
 	displacementMap: string;
-	specularMap: string;
 	mapWidth: number;
 	mapHeight: number;
 	radius: number;

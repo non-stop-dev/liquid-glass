@@ -1,3 +1,4 @@
+import { blurField, encodeMaps, resolveDisplacementScale } from "./map-raster.js";
 import type {
 	LiquidGlassEdge,
 	LiquidGlassEdges,
@@ -6,18 +7,6 @@ import type {
 	LiquidGlassMaps,
 	LiquidGlassRadius,
 	LiquidGlassShape,
-	LiquidGlassSpecularHighlight,
-} from "./types.js";
-
-export type {
-	LiquidGlassEdge,
-	LiquidGlassEdges,
-	LiquidGlassInteriorLens,
-	LiquidGlassMapOptions,
-	LiquidGlassMaps,
-	LiquidGlassRadius,
-	LiquidGlassShape,
-	LiquidGlassSpecularHighlight,
 } from "./types.js";
 
 interface FieldSample {
@@ -41,7 +30,6 @@ interface FilledLensOptions {
 	deformationY: number;
 }
 
-const neutralChannel = 128;
 const maxCacheEntries = 48;
 const mapCache = new Map<string, LiquidGlassMaps>();
 
@@ -78,8 +66,6 @@ export function createLiquidGlassMaps(
 	const deformationY = normalizeLiquidGlassControl(options.deformationY, 1.5);
 	const bezel = resolveBezelPixels(width, height, bezelControl);
 	const activeEdges = normalizeEdges(options.activeEdges);
-	const hasSpecularHighlight = options.specularHighlight;
-	const specularHighlight = normalizeSpecularHighlight(options.specularHighlight);
 	const requestedScale = resolveRequestedScale(scaleControl);
 	const fillRefraction = options.fillRefraction === true;
 	const interiorLens = options.interiorLens ?? "linear";
@@ -94,7 +80,6 @@ export function createLiquidGlassMaps(
 		radius,
 		bezelControl,
 		activeEdges,
-		specularHighlight: hasSpecularHighlight,
 		scaleControl,
 		fillRefraction,
 		interiorLens,
@@ -111,7 +96,6 @@ export function createLiquidGlassMaps(
 
 	const displacementX = new Float32Array(mapWidth * mapHeight);
 	const displacementY = new Float32Array(mapWidth * mapHeight);
-	const specularAlphaField = new Float32Array(mapWidth * mapHeight);
 
 	for (let y = 0; y < mapHeight; y += 1) {
 		for (let x = 0; x < mapWidth; x += 1) {
@@ -156,35 +140,25 @@ export function createLiquidGlassMaps(
 					edgeMaskAllows(activeEdges, sample.normalX, sample.normalY)
 				) {
 					displacementX[index] +=
-						sample.normalX * magnitude * (requestedScale / 2);
+						-sample.normalX * magnitude * (requestedScale / 2);
 					displacementY[index] +=
-						sample.normalY * magnitude * (requestedScale / 2);
+						-sample.normalY * magnitude * (requestedScale / 2);
 				}
-			}
-
-			if (
-				sample.distanceInside <= bezel &&
-				edgeMaskAllows(specularHighlight, sample.normalX, sample.normalY)
-			) {
-				const edgeProgress = sample.distanceInside / bezel;
-
-				specularAlphaField[index] = specularRimAlpha(edgeProgress);
 			}
 		}
 	}
 
 	const blurredDisplacementX = blurField(displacementX, mapWidth, mapHeight);
 	const blurredDisplacementY = blurField(displacementY, mapWidth, mapHeight);
-	const blurredSpecularAlpha = blurField(specularAlphaField, mapWidth, mapHeight);
+	containBoundary(blurredDisplacementX, blurredDisplacementY, options, mapWidth, mapHeight, width, height, radius);
 	const displacementScale = resolveDisplacementScale(
 		blurredDisplacementX,
 		blurredDisplacementY,
-		resolveMaxDisplacementScale(width, height, interiorLens),
+		80,
 	);
 	const maps = encodeMaps(
 		blurredDisplacementX,
 		blurredDisplacementY,
-		blurredSpecularAlpha,
 		mapWidth,
 		mapHeight,
 		radius,
@@ -206,6 +180,33 @@ export function createLiquidGlassMaps(
 	return maps;
 }
 
+// Smoothing must not leak displacement across the clip. Keep the outer
+// half-texel neutral, then restore the field smoothly over one texel.
+function containBoundary(
+	xField: Float32Array,
+	yField: Float32Array,
+	options: LiquidGlassMapOptions,
+	mapWidth: number,
+	mapHeight: number,
+	width: number,
+	height: number,
+	radius: number,
+): void {
+	const texel = Math.max(width / mapWidth, height / mapHeight);
+	for (let y = 0; y < mapHeight; y += 1) {
+		for (let x = 0; x < mapWidth; x += 1) {
+			const cssX = ((x + 0.5) / mapWidth) * width;
+			const cssY = ((y + 0.5) / mapHeight) * height;
+			const sample = options.shape === "circle"
+				? sampleCircleField(cssX, cssY, width, height)
+				: sampleRoundedRectField(cssX, cssY, width, height, radius);
+			const weight = smootherstep(texel / 2, texel * 1.5, sample.distanceInside);
+			xField[y * mapWidth + x] *= weight;
+			yField[y * mapWidth + x] *= weight;
+		}
+	}
+}
+
 export interface LiquidGlassMapCacheKeyOptions {
 	width: number;
 	height: number;
@@ -215,7 +216,6 @@ export interface LiquidGlassMapCacheKeyOptions {
 	radius: number;
 	bezelControl: number;
 	activeEdges: EdgeMask;
-	specularHighlight: LiquidGlassSpecularHighlight;
 	scaleControl: number;
 	fillRefraction: boolean;
 	interiorLens: LiquidGlassInteriorLens;
@@ -236,7 +236,6 @@ export function createLiquidGlassMapCacheKey(
 		Math.round(options.radius * 10) / 10,
 		options.bezelControl,
 		edgeMaskKey(options.activeEdges),
-		String(options.specularHighlight),
 		options.scaleControl,
 		options.fillRefraction ? "filled" : "bezel",
 		options.interiorLens,
@@ -263,27 +262,14 @@ function resolveMapSize(
 	height: number,
 	dprBucket: number,
 ): { mapWidth: number; mapHeight: number } {
-	const maxWidth = 1536;
-	const maxHeight = 192;
-	const maxPixels = 140_000;
-	const minWidth = 96;
-	const minHeight = 32;
-
-	let mapWidth = Math.max(minWidth, Math.round(width * dprBucket));
-	let mapHeight = Math.max(minHeight, Math.round(height * dprBucket));
-	let scale = Math.min(1, maxWidth / mapWidth, maxHeight / mapHeight);
-
-	if (mapWidth * mapHeight * scale * scale > maxPixels) {
-		scale = Math.min(scale, Math.sqrt(maxPixels / (mapWidth * mapHeight)));
-	}
-
-	mapWidth = Math.max(minWidth, Math.round(mapWidth * scale));
-	mapHeight = Math.max(minHeight, Math.round(mapHeight * scale));
-
-	return { mapWidth, mapHeight };
+	const scale = Math.min(dprBucket, 1536 / Math.max(width, height), Math.sqrt(140_000 / (width * height)));
+	return {
+		mapWidth: Math.max(1, Math.floor(width * scale)),
+		mapHeight: Math.max(1, Math.floor(height * scale)),
+	};
 }
 
-function resolveRadius(
+export function resolveRadius(
 	width: number,
 	height: number,
 	radius: LiquidGlassRadius,
@@ -383,7 +369,7 @@ function roundedRectNormal(
 
 function bevelMagnitude(progress: number): number {
 	const t = Math.max(0, Math.min(progress, 1));
-	const edgeStart = 0.12 * (1 - smootherstep(0.88, 1, t));
+
 	const squircleArc = 1 - Math.abs(2 * t - 1) ** 4;
 	const curvedBezel =
 		smootherstep(0, 0.12, t) *
@@ -391,7 +377,7 @@ function bevelMagnitude(progress: number): number {
 		(1 - smootherstep(0.82, 1, t)) *
 		0.9;
 
-	return Math.min(1, edgeStart + curvedBezel);
+	return Math.min(1, curvedBezel);
 }
 
 function filledLensOffset(
@@ -434,14 +420,6 @@ function filledLensOffset(
 	};
 }
 
-function resolveMaxDisplacementScale(
-	_width: number,
-	_height: number,
-	_interiorLens: LiquidGlassInteriorLens,
-): number {
-	return 80;
-}
-
 function resolveFisheyeStrength(deformation: number): number {
 	return 1 + (deformation / 10) * 3.2;
 }
@@ -460,143 +438,6 @@ function fisheyeAxis(value: number, strength: number, blend: number): number {
 	return value + (clampedValue - value) * blend;
 }
 
-function specularRimAlpha(progress: number): number {
-	const t = Math.max(0, Math.min(progress, 1));
-	const rimBand =
-		smootherstep(0, 0.16, t) *
-		(1 - smootherstep(0.74, 1, t));
-	const glassLip = 0.18 + 0.82 * (1 - smootherstep(0.46, 1, t));
-
-	return Math.min(0.78, rimBand * glassLip);
-}
-
-function blurField(
-	field: Float32Array,
-	width: number,
-	height: number,
-): Float32Array {
-	const output = new Float32Array(field.length);
-
-	for (let y = 0; y < height; y += 1) {
-		for (let x = 0; x < width; x += 1) {
-			let total = 0;
-			let weight = 0;
-
-			for (let offsetY = -1; offsetY <= 1; offsetY += 1) {
-				const sampleY = clampInteger(y + offsetY, 0, height - 1);
-				const weightY = offsetY === 0 ? 2 : 1;
-
-				for (let offsetX = -1; offsetX <= 1; offsetX += 1) {
-					const sampleX = clampInteger(x + offsetX, 0, width - 1);
-					const sampleWeight = weightY * (offsetX === 0 ? 2 : 1);
-
-					total += field[sampleY * width + sampleX] * sampleWeight;
-					weight += sampleWeight;
-				}
-			}
-
-			output[y * width + x] = total / weight;
-		}
-	}
-
-	return output;
-}
-
-function resolveDisplacementScale(
-	displacementX: Float32Array,
-	displacementY: Float32Array,
-	maxScale: number,
-): number {
-	let maxOffset = 0;
-
-	for (let index = 0; index < displacementX.length; index += 1) {
-		maxOffset = Math.max(
-			maxOffset,
-			Math.abs(displacementX[index]),
-			Math.abs(displacementY[index]),
-		);
-	}
-
-	return Math.max(20, Math.min(Math.ceil(maxOffset * 2), maxScale));
-}
-
-function encodeMaps(
-	displacementX: Float32Array,
-	displacementY: Float32Array,
-	specularAlphaField: Float32Array,
-	width: number,
-	height: number,
-	radius: number,
-	bezel: number,
-	dprBucket: number,
-	displacementScale: number,
-): LiquidGlassMaps {
-	const canvas = document.createElement("canvas");
-
-	canvas.width = width;
-	canvas.height = height;
-
-	const context = canvas.getContext("2d");
-
-	if (!context) {
-		throw new Error("Could not create liquid glass canvas context.");
-	}
-
-	const displacementData = context.createImageData(width, height);
-
-	for (let index = 0; index < displacementX.length; index += 1) {
-		const pixelIndex = index * 4;
-
-		displacementData.data[pixelIndex] = encodeChannel(
-			displacementX[index],
-			displacementScale,
-		);
-		displacementData.data[pixelIndex + 1] = encodeChannel(
-			displacementY[index],
-			displacementScale,
-		);
-		displacementData.data[pixelIndex + 2] = neutralChannel;
-		displacementData.data[pixelIndex + 3] = 255;
-	}
-
-	context.putImageData(displacementData, 0, 0);
-
-	const displacementMap = canvas.toDataURL("image/png");
-	const specularData = context.createImageData(width, height);
-
-	for (let index = 0; index < specularAlphaField.length; index += 1) {
-		const pixelIndex = index * 4;
-		const alpha = Math.round(
-			Math.max(0, Math.min(specularAlphaField[index], 1)) * 255,
-		);
-
-		specularData.data[pixelIndex] = 255;
-		specularData.data[pixelIndex + 1] = 255;
-		specularData.data[pixelIndex + 2] = 255;
-		specularData.data[pixelIndex + 3] = alpha;
-	}
-
-	context.putImageData(specularData, 0, 0);
-
-	return {
-		displacementMap,
-		specularMap: canvas.toDataURL("image/png"),
-		mapWidth: width,
-		mapHeight: height,
-		radius,
-		bezel,
-		dprBucket,
-		displacementScale,
-	};
-}
-
-function encodeChannel(value: number, displacementScale: number): number {
-	return Math.max(
-		0,
-		Math.min(255, Math.round(255 * (0.5 + value / displacementScale))),
-	);
-}
-
 function smootherstep(edge0: number, edge1: number, value: number): number {
 	if (edge0 === edge1) {
 		return value < edge0 ? 0 : 1;
@@ -605,10 +446,6 @@ function smootherstep(edge0: number, edge1: number, value: number): number {
 	const x = Math.max(0, Math.min((value - edge0) / (edge1 - edge0), 1));
 
 	return x * x * x * (x * (x * 6 - 15) + 10);
-}
-
-function clampInteger(value: number, min: number, max: number): number {
-	return Math.max(min, Math.min(value, max));
 }
 
 function clampNumber(value: number, min: number, max: number): number {
@@ -648,12 +485,6 @@ function normalizeEdges(edges: LiquidGlassEdges): EdgeMask {
 		bottom: selectedEdges.includes("bottom"),
 		left: selectedEdges.includes("left"),
 	};
-}
-
-function normalizeSpecularHighlight(
-	specularHighlight: LiquidGlassSpecularHighlight,
-): EdgeMask {
-	return normalizeEdges(specularHighlight ? "all" : "none");
 }
 
 function edgeMaskAllows(edges: EdgeMask, normalX: number, normalY: number): boolean {

@@ -31,7 +31,6 @@ Use the element as an empty visual layer. Put content in a separate layer above 
 		bezel="1"
 		scale="4.3"
 		active-edges="all"
-		specular-highlight="false"
 		fill-refraction="true"
 		interior-lens="fisheye"
 		deformation-x="3"
@@ -60,7 +59,6 @@ import { LiquidGlassSurface } from "@rawr-labs/visual-components/astro";
 		bezel={1}
 		scale={4.3}
 		activeEdges="all"
-		specularHighlight={false}
 		fillRefraction
 		interiorLens="fisheye"
 		deformationX={3}
@@ -89,7 +87,6 @@ export function NavGlass() {
 				bezel={1}
 				scale={4.3}
 				activeEdges="all"
-				specularHighlight={false}
 				fillRefraction
 				interiorLens="fisheye"
 				deformationX={3}
@@ -109,13 +106,12 @@ Numeric controls use a normalized `0-10` range. Decimals are accepted and rounde
 
 | Prop | Attribute | Values | Default | Description |
 | --- | --- | --- | --- | --- |
-| `id` | `id` | string | required | Stable id used to link the SVG filter and backdrop-filter. |
+| `id` | `id` | string | required | Stable DOM id for the custom element host. Internal filter ids are generated independently. |
 | `shape` | `shape` | `"rounded-rect"` or `"circle"` | `"rounded-rect"` | Lens geometry. |
 | `radius` | `radius` | `"capsule"` or number | `"capsule"` | Capsule resolves to half the shortest side. Numeric values use the normalized range. |
 | `bezel` | `bezel` | number | `5` | Edge ramp width. |
 | `scale` | `scale` | number | `4` | Base displacement intensity. |
 | `activeEdges` | `active-edges` | `"all"`, `"none"`, edge, or edge list | `"all"` | Edges that participate in refraction. Edges are `top`, `right`, `bottom`, `left`. |
-| `specularHighlight` | `specular-highlight` | `true` or `false` | `true` | Enables the generated normal-based rim lighting. |
 | `fillRefraction` | `fill-refraction` | boolean | `false` | Refracts the whole surface instead of only the bezel. |
 | `interiorLens` | `interior-lens` | `"linear"` or `"fisheye"` | `"linear"` | Interior lens deformation model. |
 | `deformationX` | `deformation-x` | number | `2` | X-axis deformation strength for fisheye mode. |
@@ -127,7 +123,7 @@ Numeric controls use a normalized `0-10` range. Decimals are accepted and rounde
 
 The surface uses SVG `feImage` plus `feDisplacementMap` through CSS `backdrop-filter: url(#filter-id)`. Red encodes X displacement, green encodes Y displacement, and neutral displacement is `128`. The blue channel stays neutral and alpha stays opaque.
 
-The displacement map is generated from rounded-rect or circle geometry and must match the rendered aspect ratio. Maps regenerate on mount, resize, or attribute changes. They are cached by size, radius, bezel, shape, active edges, specular highlight, scale, lens mode, deformation values, fill mode, and DPR bucket.
+The displacement map is generated from rounded-rect or circle geometry and must match the rendered aspect ratio. Maps regenerate on mount, resize, or geometry changes; synchronous attribute changes are batched. Frosted and tint changes reuse the existing map, SVG, and observer. They are cached by size, radius, bezel, shape, active edges, scale, lens mode, deformation values, fill mode, and DPR bucket.
 
 The turbulence primitive is not used. Content must live outside the filtered layer, above the custom element, so text and controls remain sharp.
 
@@ -135,3 +131,5 @@ The turbulence primitive is not used. Content must live outside the filtered lay
 
 - [Kube: Liquid Glass CSS SVG](https://kube.io/blog/liquid-glass-css-svg/#svg-filter-as-backdrop-filter)
 - [shuding/liquid-glass](https://github.com/shuding/liquid-glass)
+
+SVG backdrop refraction is enabled for Chromium browsers that accept URL filters. Other engines use the explicit blur/tint fallback; CSS syntax support alone is not proof of SVG rendering. `data-liquid-glass-ready` means the map and filter are installed. Fallback surfaces expose `data-liquid-glass-fallback-reason`. Generation failures clear the filter, emit a bubbling `liquid-glass-error` event with an `Error` in `detail`, and log the error.

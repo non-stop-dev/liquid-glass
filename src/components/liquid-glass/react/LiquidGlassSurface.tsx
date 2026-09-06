@@ -1,3 +1,5 @@
+"use client";
+
 import "../core/liquid-glass.css";
 
 import { createElement, useEffect, type CSSProperties, type ReactElement } from "react";

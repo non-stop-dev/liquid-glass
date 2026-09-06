@@ -47,7 +47,6 @@ describe("liquid glass map controls", () => {
 			radius: 36,
 			bezelControl: 1,
 			activeEdges: allEdges,
-			specularHighlight: true,
 			scaleControl: 4.3,
 			fillRefraction: true,
 			interiorLens: "fisheye",
@@ -57,50 +56,63 @@ describe("liquid glass map controls", () => {
 		});
 
 		expect(cacheKey).toBe(
-			"320:72:640:144:rounded-rect:36:1:all:true:4.3:filled:fisheye:3:2:2",
+			"320:72:640:144:rounded-rect:36:1:all:4.3:filled:fisheye:3:2:2",
 		);
 	});
 
-	it("generates an angle-independent alpha mask for the specular rim", () => {
-		const specular = captureSpecularMask({
-			width: 118,
-			height: 54,
-			shape: "rounded-rect",
-			radius: "capsule",
-			bezel: 5,
-			activeEdges: "all",
-			specularHighlight: true,
-			dpr: 1,
-			scale: 4,
-			fillRefraction: true,
-			interiorLens: "linear",
+	it.each([true, false])("samples inward with fillRefraction=%s", (fillRefraction) => {
+		const { image, maps } = captureDisplacementMap({
+			width: 118, height: 54, shape: "rounded-rect", radius: "capsule",
+			bezel: 5, activeEdges: "all", dpr: 1, scale: 4, fillRefraction,
 		});
-
-		expect(maxAlpha(specular)).toBeGreaterThan(120);
-		expect(alphaAt(specular, 0, 0)).toBe(0);
-		expect(alphaAt(specular, specular.width / 2, specular.height / 2)).toBe(0);
+		expect(maps).not.toHaveProperty("specularMap");
+		expect(channelAt(image, 10, 27, 0)).toBeGreaterThan(128);
+		expect(channelAt(image, 107, 27, 0)).toBeLessThan(128);
+		expect(channelAt(image, 59, 7, 1)).toBeGreaterThan(128);
+		expect(channelAt(image, 59, 46, 1)).toBeLessThan(128);
 	});
 
-	it("emits a transparent specular mask when highlights are disabled", () => {
-		const specular = captureSpecularMask({
-			width: 134,
-			height: 62,
-			shape: "rounded-rect",
-			radius: "capsule",
-			bezel: 5,
-			activeEdges: "all",
-			specularHighlight: false,
-			dpr: 1,
-			scale: 4,
-			fillRefraction: true,
-			interiorLens: "linear",
+	it.each([true, false])("keeps the clip boundary neutral after smoothing with fillRefraction=%s", (fillRefraction) => {
+		const { image } = captureDisplacementMap({
+			width: 120, height: 60, shape: "rounded-rect", radius: 0,
+			bezel: 5, activeEdges: "all", dpr: 1, scale: 4, fillRefraction,
 		});
-
-		expect(maxAlpha(specular)).toBe(0);
+		for (let x = 0; x < image.width; x += 1) {
+			expect(channelAt(image, x, 0, 1)).toBe(128);
+			expect(channelAt(image, x, image.height - 1, 1)).toBe(128);
+		}
+		for (let y = 0; y < image.height; y += 1) {
+			expect(channelAt(image, 0, y, 0)).toBe(128);
+			expect(channelAt(image, image.width - 1, y, 0)).toBe(128);
+		}
 	});
+
+	it.each([[1200, 300], [300, 1200], [8, 1000], [1000, 8]])("bounds raster work and preserves aspect ratio for %s x %s", (width, height) => {
+		const { maps } = captureDisplacementMap({
+			width, height, shape: "rounded-rect", radius: 2,
+			bezel: 3, activeEdges: "all", dpr: 2, scale: 2,
+		});
+		expect(maps.mapWidth * maps.mapHeight).toBeLessThanOrEqual(140_000);
+		expect(Math.max(maps.mapWidth, maps.mapHeight)).toBeLessThanOrEqual(1536);
+		expect(Math.abs(maps.mapWidth / width - maps.mapHeight / height)).toBeLessThanOrEqual(1 / Math.min(width, height));
+	});
+
+	it.each([
+		[448, 256, 0, 0],
+		[448, 256, 1.2, 15.36],
+		[256, 448, 1.2, 15.36],
+		[448, 256, 10, 128],
+	] as const)("resolves %s x %s radius %s from the shortest side", (width, height, radius, expected) => {
+		const { maps } = captureDisplacementMap({
+			width, height, radius, shape: "rounded-rect", bezel: 1,
+			activeEdges: "all", dpr: 1, scale: 2, fillRefraction: true,
+		});
+		expect(maps.radius).toBeCloseTo(expected);
+	});
+
 });
 
-function captureSpecularMask(options: LiquidGlassMapOptions): CapturedImageData {
+function captureDisplacementMap(options: LiquidGlassMapOptions) {
 	const captures: CapturedImageData[] = [];
 	const originalGetContext = HTMLCanvasElement.prototype.getContext;
 	const originalToDataURL = HTMLCanvasElement.prototype.toDataURL;
@@ -133,41 +145,18 @@ function captureSpecularMask(options: LiquidGlassMapOptions): CapturedImageData 
 	};
 
 	try {
-		createLiquidGlassMaps(options);
+		const maps = createLiquidGlassMaps(options);
+		expect(captures).toHaveLength(1);
+		const image = captures[0];
+		if (!image) throw new Error("Expected displacement image data.");
+		return { image, maps };
 	} finally {
 		HTMLCanvasElement.prototype.getContext = originalGetContext;
 		HTMLCanvasElement.prototype.toDataURL = originalToDataURL;
 	}
 
-	const specular = captures[1];
-
-	if (!specular) {
-		throw new Error("Expected liquid glass specular mask data.");
-	}
-
-	return specular;
 }
 
-function alphaAt(image: CapturedImageData, x: number, y: number): number {
-	const clampedX = Math.max(0, Math.min(Math.floor(x), image.width - 1));
-	const clampedY = Math.max(0, Math.min(Math.floor(y), image.height - 1));
-
-	return image.data[(clampedY * image.width + clampedX) * 4 + 3] ?? 0;
-}
-
-function maxAlpha(
-	image: CapturedImageData,
-	predicate: (x: number, y: number) => boolean = () => true,
-): number {
-	let max = 0;
-
-	for (let y = 0; y < image.height; y += 1) {
-		for (let x = 0; x < image.width; x += 1) {
-			if (predicate(x, y)) {
-				max = Math.max(max, alphaAt(image, x, y));
-			}
-		}
-	}
-
-	return max;
+function channelAt(image: CapturedImageData, x: number, y: number, channel: number): number {
+	return image.data[(y * image.width + x) * 4 + channel] ?? 0;
 }

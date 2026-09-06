@@ -57,14 +57,14 @@
 		}
 	},
 	"devDependencies": {
-		"@astrojs/react": "5.0.4",
+		"@astrojs/react": "6.0.5",
 		"@lucide/astro": "^1.14.0",
 		"@tailwindcss/vite": "^4.2.4",
 		"@types/node": "24.9.1",
 		"@types/react": "19.2.2",
 		"@types/react-dom": "19.2.2",
 		"@vitejs/plugin-react": "^5.0.0",
-		"astro": "6.2.1",
+		"astro": "7.3.1",
 		"jsdom": "^27.0.0",
 		"react": "19.2.0",
 		"react-dom": "19.2.0",
