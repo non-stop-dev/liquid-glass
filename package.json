@@ -1,6 +1,6 @@
 {
 	"name": "@non-stop-dev/liquid-glass",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Framework-agnostic visual components with thin Astro and React wrappers.",
 	"license": "MIT",
 	"type": "module",
