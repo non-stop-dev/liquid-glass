@@ -72,9 +72,9 @@ jobs:
         if: steps.check_version.outputs.should_publish == 'true'
         run: npm install -g npm@latest
 
-      - name: Publish to npm (Trusted Publishing via OIDC)
+      - name: Stage package to npm (npm stage publish)
         if: steps.check_version.outputs.should_publish == 'true'
-        run: npm publish --provenance --access public
+        run: npm stage publish --provenance --access public
 
       - name: Stage package tarball (pnpm pack)
         run: |
@@ -97,8 +97,9 @@ jobs:
           echo "- **Package**: \`$PACKAGE_NAME\`" >> $GITHUB_STEP_SUMMARY
           echo "- **Version**: \`$PACKAGE_VERSION\`" >> $GITHUB_STEP_SUMMARY
           if [ "${{ steps.check_version.outputs.should_publish }}" = "true" ]; then
-            echo "- **Publish Status**: 🚀 Successfully published to npm with Provenance" >> $GITHUB_STEP_SUMMARY
+            echo "- **Stage Status**: 🚀 Submitted to npm staging queue with Provenance" >> $GITHUB_STEP_SUMMARY
+            echo "- **Approval**: Maintainer can approve on npmjs.com (Staged Packages tab) or via \`npm stage approve <stage-id>\`" >> $GITHUB_STEP_SUMMARY
           else
-            echo "- **Publish Status**: ℹ️ Version already exists on npm (Skipped re-publish)" >> $GITHUB_STEP_SUMMARY
+            echo "- **Stage Status**: ℹ️ Version already exists on npm (Skipped)" >> $GITHUB_STEP_SUMMARY
           fi
           echo "- **Artifact**: Release tarball generated and uploaded" >> $GITHUB_STEP_SUMMARY
