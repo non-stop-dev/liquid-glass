@@ -1,162 +1,163 @@
-# Rawr Labs Visual Components
+# @non-stop-dev/liquid-glass
 
-Framework-agnostic visual primitives for Rawr Labs interfaces.
+> Modern, optical liquid glass surface primitives for the web platform, Astro, and React.
 
-The first component is `liquid-glass-surface`, a custom element that renders one empty backdrop-filter layer backed by deterministic SVG displacement maps. The core custom element is the source of truth. Astro and React wrappers exist only for typed props, IntelliSense, and framework ergonomics.
+Experience real backdrop refraction with customizable lenses, bezels, frosted overlays, and fluid optical physics — built as a framework-agnostic custom element with zero-overhead Astro and React wrappers.
 
-Component source lives in dedicated folders under `src/components/`. The Astro documentation site lives in `src/pages/`.
+## Features
 
-## Install
+- **Framework Agnostic**: Native Custom Element (`<liquid-glass-surface>`) works in any modern framework or vanilla JS.
+- **First-Class Wrappers**: Dedicated, typed components for **Astro** and **React**.
+- **Optical Refraction**: Physically accurate displacement maps with fisheye and linear lens modes.
+- **Progressive Enhancement**: Real refraction in supported engines, with an elegant frosted fallback.
+- **Fully Customizable**: Control radius, bezel ramp, deformation strength, frosting, and tints with intuitive props.
+
+## Installation
 
 ```sh
+# pnpm
 pnpm add @non-stop-dev/liquid-glass
+
+# npm
+npm install @non-stop-dev/liquid-glass
+
+# bun / yarn
+bun add @non-stop-dev/liquid-glass
+yarn add @non-stop-dev/liquid-glass
 ```
 
-## Local development and release preparation
+## Usage
 
-The documentation site imports the same public package exports that consumers use. Build the package before starting the site so local changes to the Liquid Glass core are reflected in `dist`:
+### 1. Astro
 
-```sh
-pnpm install
-pnpm build
-pnpm dev
-```
-
-Before a release, run the checks and inspect the exact archive that would be uploaded:
-
-```sh
-pnpm typecheck
-pnpm test
-pnpm build
-pnpm site:build
-pnpm pack --dry-run
-pnpm publish --dry-run
-```
-
-The package is configured for public publication to the npm registry. Once you have selected a new version and logged in with an account that can publish the `@rawr-labs` scope, publish with:
-
-```sh
-pnpm publish
-```
-
-## Plain Custom Element
-
-Import the self-registering core entry and the CSS:
-
-```ts
-import "@non-stop-dev/liquid-glass";
-import "@non-stop-dev/liquid-glass/styles.css";
-```
-
-Use the element as an empty visual layer. Put content in a separate layer above it.
-
-```html
-<div class="nav-shell">
-	<liquid-glass-surface
-		id="nav-glass"
-		radius="capsule"
-		bezel="1"
-		scale="4.3"
-		active-edges="all"
-		fill-refraction="true"
-		interior-lens="fisheye"
-		deformation-x="3"
-		deformation-y="3"
-		frosted="4"
-		frosted-tint="black"
-	></liquid-glass-surface>
-	<nav class="content-layer">Sharp text and controls</nav>
-</div>
-```
-
-## Astro
-
-The Astro wrapper imports the CSS and registers the custom element.
+The Astro component imports the necessary styles and registers the custom element automatically:
 
 ```astro
 ---
 import { LiquidGlassSurface } from "@non-stop-dev/liquid-glass/astro";
 ---
 
-<div class="nav-shell">
-	<LiquidGlassSurface
-		id="nav-glass"
-		class="absolute inset-0"
-		radius="capsule"
-		bezel={1}
-		scale={4.3}
-		activeEdges="all"
-		fillRefraction
-		interiorLens="fisheye"
-		deformationX={3}
-		deformationY={3}
-		frosted={4}
-		frostedTint="black"
-	/>
-	<nav class="content-layer">Sharp text and controls</nav>
+<div class="relative h-16 w-80 overflow-hidden rounded-full border border-white/10">
+  <!-- The glass surface renders as an empty background layer -->
+  <LiquidGlassSurface
+    id="nav-glass"
+    class="absolute inset-0"
+    radius="capsule"
+    bezel={1}
+    scale={4}
+    activeEdges="all"
+    fillRefraction
+    interiorLens="fisheye"
+    deformationX={3}
+    deformationY={3}
+    frosted={4}
+    frostedTint="black"
+  />
+
+  <!-- Place your content in a layer above the glass surface -->
+  <nav class="relative z-10 flex h-full items-center justify-between px-6 text-white">
+    <span class="font-bold">Brand</span>
+    <span>Menu</span>
+  </nav>
 </div>
 ```
 
-## React
+---
 
-The React wrapper imports the CSS and registers the custom element in an effect.
+### 2. React (Next.js, Vite, Remix)
+
+The React wrapper registers the custom element and exposes typed props:
 
 ```tsx
 import { LiquidGlassSurface } from "@non-stop-dev/liquid-glass/react";
 
-export function NavGlass() {
-	return (
-		<div className="nav-shell">
-			<LiquidGlassSurface
-				id="nav-glass"
-				className="absolute inset-0"
-				radius="capsule"
-				bezel={1}
-				scale={4.3}
-				activeEdges="all"
-				fillRefraction
-				interiorLens="fisheye"
-				deformationX={3}
-				deformationY={3}
-				frosted={4}
-				frostedTint="black"
-			/>
-			<nav className="content-layer">Sharp text and controls</nav>
-		</div>
-	);
+export function FloatingNav() {
+  return (
+    <div className="relative h-16 w-80 overflow-hidden rounded-full border border-white/10">
+      {/* Liquid glass background layer */}
+      <LiquidGlassSurface
+        id="react-nav-glass"
+        className="absolute inset-0"
+        radius="capsule"
+        bezel={1}
+        scale={4}
+        activeEdges="all"
+        fillRefraction
+        interiorLens="fisheye"
+        deformationX={3}
+        deformationY={3}
+        frosted={4}
+        frostedTint="white"
+      />
+
+      {/* Content layer */}
+      <nav className="relative z-10 flex h-full items-center justify-between px-6 text-white">
+        <span className="font-bold">Home</span>
+        <span>Explore</span>
+      </nav>
+    </div>
+  );
 }
 ```
 
-## Props
+---
 
-Numeric controls use a normalized `0-10` range. Decimals are accepted and rounded to one decimal place.
+### 3. HTML & Vanilla JavaScript / Web Components
 
-| Prop | Attribute | Values | Default | Description |
-| --- | --- | --- | --- | --- |
-| `id` | `id` | string | required | Stable DOM id for the custom element host. Internal filter ids are generated independently. |
-| `shape` | `shape` | `"rounded-rect"` or `"circle"` | `"rounded-rect"` | Lens geometry. |
-| `radius` | `radius` | `"capsule"` or number | `"capsule"` | Capsule resolves to half the shortest side. Numeric values use the normalized range. |
-| `bezel` | `bezel` | number | `5` | Edge ramp width. |
-| `scale` | `scale` | number | `4` | Base displacement intensity. |
-| `activeEdges` | `active-edges` | `"all"`, `"none"`, edge, or edge list | `"all"` | Edges that participate in refraction. Edges are `top`, `right`, `bottom`, `left`. |
-| `fillRefraction` | `fill-refraction` | boolean | `false` | Refracts the whole surface instead of only the bezel. |
-| `interiorLens` | `interior-lens` | `"linear"` or `"fisheye"` | `"linear"` | Interior lens deformation model. |
-| `deformationX` | `deformation-x` | number | `2` | X-axis deformation strength for fisheye mode. |
-| `deformationY` | `deformation-y` | number | `1.5` | Y-axis deformation strength for fisheye mode. |
-| `frosted` | `frosted` | number | `0` | Readability layer strength. |
-| `frostedTint` | `frosted-tint` | `"black"` or `"white"` | `"white"` | Tint direction for the frosted layer. |
+Import the self-registering element and CSS styles:
 
-## Physics Notes
+```html
+<!-- Via ES Module bundler (Vite, Webpack, etc.) -->
+<script type="module">
+  import "@non-stop-dev/liquid-glass";
+  import "@non-stop-dev/liquid-glass/styles.css";
+</script>
 
-The surface uses SVG `feImage` plus `feDisplacementMap` through CSS `backdrop-filter: url(#filter-id)`. Red encodes X displacement, green encodes Y displacement, and neutral displacement is `128`. The blue channel stays neutral and alpha stays opaque.
+<div class="glass-container" style="position: relative; overflow: hidden; border-radius: 9999px;">
+  <liquid-glass-surface
+    id="custom-surface"
+    style="position: absolute; inset: 0;"
+    radius="capsule"
+    bezel="1"
+    scale="4"
+    active-edges="all"
+    fill-refraction="true"
+    interior-lens="fisheye"
+    deformation-x="3"
+    deformation-y="3"
+    frosted="4"
+    frosted-tint="black"
+  ></liquid-glass-surface>
 
-The displacement map is generated from rounded-rect or circle geometry and must match the rendered aspect ratio. Maps regenerate on mount, resize, or geometry changes; synchronous attribute changes are batched. Frosted and tint changes reuse the existing map, SVG, and observer. They are cached by size, radius, bezel, shape, active edges, scale, lens mode, deformation values, fill mode, and DPR bucket.
+  <div style="position: relative; z-index: 10; padding: 1rem 1.5rem; color: white;">
+    Hello Liquid Glass
+  </div>
+</div>
+```
 
-The turbulence primitive is not used. Content must live outside the filtered layer, above the custom element, so text and controls remain sharp.
+---
 
-## Credits
+## Props Reference
 
-- [Kube: Liquid Glass CSS SVG](https://kube.io/blog/liquid-glass-css-svg/#svg-filter-as-backdrop-filter)
-- [shuding/liquid-glass](https://github.com/shuding/liquid-glass)
+| Prop | HTML Attribute | Type | Default | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `id` | `id` | `string` | **Required** | Stable DOM identifier for the host element. |
+| `shape` | `shape` | `"rounded-rect"` \| `"circle"` | `"rounded-rect"` | Overall geometry of the lens. |
+| `radius` | `radius` | `"capsule"` \| `number` (0–10) | `"capsule"` | Corner curvature. `"capsule"` rounds the shortest side. |
+| `bezel` | `bezel` | `number` (0–10) | `5` | Width and intensity of the outer bezel edge ramp. |
+| `scale` | `scale` | `number` (0–10) | `4` | Refraction and displacement strength. |
+| `activeEdges` | `active-edges` | `"all"` \| `"none"` \| `Edge` \| `Edge[]` | `"all"` | Which edges participate in refraction (`"top"`, `"right"`, `"bottom"`, `"left"`). |
+| `fillRefraction` | `fill-refraction` | `boolean` | `false` | Whether optical refraction fills the interior surface or only the bezel. |
+| `interiorLens` | `interior-lens` | `"linear"` \| `"fisheye"` | `"linear"` | Deformation curve for the interior surface. |
+| `deformationX` | `deformation-x` | `number` (0–10) | `2` | Horizontal distortion intensity in fisheye mode. |
+| `deformationY` | `deformation-y` | `number` (0–10) | `1.5` | Vertical distortion intensity in fisheye mode. |
+| `frosted` | `frosted` | `number` (0–10) | `0` | Blur/frosted diffusion layer strength for text readability. |
+| `frostedTint` | `frosted-tint` | `"white"` \| `"black"` | `"white"` | Tint shade applied across the frosted diffusion layer. |
 
-SVG backdrop refraction is enabled for Chromium browsers that accept URL filters. Other engines use the explicit blur/tint fallback; CSS syntax support alone is not proof of SVG rendering. `data-liquid-glass-ready` means the map and filter are installed. Fallback surfaces expose `data-liquid-glass-fallback-reason`. Generation failures clear the filter, emit a bubbling `liquid-glass-error` event with an `Error` in `detail`, and log the error.
+> **Note:** Put content in a separate layer above the glass surface (with a higher `z-index`) so that text, icons, and interactive controls remain sharp and clickable.
+
+---
+
+## License
+
+[MIT](LICENSE)

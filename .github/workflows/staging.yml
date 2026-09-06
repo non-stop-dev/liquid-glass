@@ -1,4 +1,4 @@
-name: Publish Package
+name: Package Staging
 
 on:
   push:
@@ -10,16 +10,16 @@ on:
       - 'scripts/copy-static.mjs'
       - 'tsconfig.build.json'
       - 'package.json'
-      - '.github/workflows/publish.yml'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/staging.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
-  id-token: write # Required for npm Trusted Publishing (OIDC) & provenance
 
 jobs:
-  verify-and-publish:
-    name: Verify & Publish to npm
+  stage-package:
+    name: Build, Verify & Stage Package
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -34,7 +34,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          registry-url: 'https://registry.npmjs.org'
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -52,21 +51,29 @@ jobs:
       - name: Validate documentation site build
         run: pnpm run site:build
 
-      - name: Check if version is already published
-        id: check_version
+      - name: Stage package tarball (pnpm pack)
+        run: |
+          pnpm pack
+          echo "Tarball created:"
+          ls -la *.tgz
+
+      - name: Verify package dry-run
+        run: pnpm publish --dry-run --no-git-checks
+
+      - name: Upload staged package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: liquid-glass-staged-package
+          path: '*.tgz'
+          retention-days: 14
+
+      - name: Staging Summary
         run: |
           PACKAGE_NAME=$(node -p "require('./package.json').name")
           PACKAGE_VERSION=$(node -p "require('./package.json').version")
-          echo "Checking registry for $PACKAGE_NAME@$PACKAGE_VERSION..."
-
-          if npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version > /dev/null 2>&1; then
-            echo "Version $PACKAGE_VERSION is already published on npm. Skipping publication."
-            echo "should_publish=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "Version $PACKAGE_VERSION is new. Proceeding with publication."
-            echo "should_publish=true" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Publish to npm (OIDC Trusted Publishing)
-        if: steps.check_version.outputs.should_publish == 'true'
-        run: pnpm publish --access public --provenance --no-git-checks || npm publish --access public --provenance
+          echo "### 📦 Package Staging Successful" >> $GITHUB_STEP_SUMMARY
+          echo "- **Package**: \`$PACKAGE_NAME\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version**: \`$PACKAGE_VERSION\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: Staged & Verified (Ready for manual \`pnpm publish\`)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The release tarball has been uploaded as an artifact to this workflow run." >> $GITHUB_STEP_SUMMARY
