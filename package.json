@@ -4,6 +4,7 @@
 	"description": "Framework-agnostic visual components with thin Astro and React wrappers.",
 	"license": "MIT",
 	"type": "module",
+	"packageManager": "pnpm@12.3.4",
 	"private": false,
 	"repository": {
 		"type": "git",
