@@ -1,6 +1,6 @@
 ---
 import { ChevronLeft, ChevronRight } from "@lucide/astro";
-import { LiquidGlassSurface } from "@rawr-labs/visual-components/astro";
+import { LiquidGlassSurface } from "@rawr-labs/liquid-glass/astro";
 import CodeTabs from "./CodeTabs.astro";
 
 interface Props {
@@ -129,8 +129,8 @@ const codeExamples = [
 	{
 		label: "HTML",
 		code: `<script type="module">
-  import "@rawr-labs/visual-components/liquid-glass";
-  import "@rawr-labs/visual-components/styles.css";
+  import "@rawr-labs/liquid-glass";
+  import "@rawr-labs/liquid-glass/styles.css";
 </script>
 
 <section class="demo-frame">
@@ -194,7 +194,7 @@ ${cssSurfaceRules}
 	},
 	{
 		label: "TypeScript",
-		code: `import type { LiquidGlassProps } from "@rawr-labs/visual-components";
+		code: `import type { LiquidGlassProps } from "@rawr-labs/liquid-glass";
 
 export const ${id.replaceAll("-", "")}Props: LiquidGlassProps = {
   ${propRows.map(([name, value]) => `${name}: ${value}`).join(",\n  ")},
@@ -203,7 +203,7 @@ export const ${id.replaceAll("-", "")}Props: LiquidGlassProps = {
 	{
 		label: "Astro",
 		code: `---
-import { LiquidGlassSurface } from "@rawr-labs/visual-components/astro";
+import { LiquidGlassSurface } from "@rawr-labs/liquid-glass/astro";
 ---
 
 <section class="${canvasClass}">
@@ -222,7 +222,7 @@ import { LiquidGlassSurface } from "@rawr-labs/visual-components/astro";
 	},
 	{
 		label: "React",
-		code: `import { LiquidGlassSurface } from "@rawr-labs/visual-components/react";
+		code: `import { LiquidGlassSurface } from "@rawr-labs/liquid-glass/react";
 
 export function ${variant === "nav" ? "NavigationSurface" : variant === "card" ? "CardSurface" : "ActionSurface"}() {
   return (

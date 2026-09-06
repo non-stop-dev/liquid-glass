@@ -5,7 +5,7 @@ export default defineConfig({
 	outDir: "site-dist",
 	vite: {
 		// This self-import changes whenever the local library is rebuilt.
-		optimizeDeps: { exclude: ["@rawr-labs/visual-components/liquid-glass"] },
+		optimizeDeps: { exclude: ["@rawr-labs/liquid-glass"] },
 		plugins: [tailwindcss()],
 	},
 });

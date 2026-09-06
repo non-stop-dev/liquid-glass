@@ -5,6 +5,14 @@
 	"license": "MIT",
 	"type": "module",
 	"private": false,
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/rawr-labs/liquid-glass.git"
+	},
+	"bugs": {
+		"url": "https://github.com/rawr-labs/liquid-glass/issues"
+	},
+	"homepage": "https://github.com/rawr-labs/liquid-glass#readme",
 	"sideEffects": [
 		"**/*.css",
 		"dist/components/liquid-glass/index.js",

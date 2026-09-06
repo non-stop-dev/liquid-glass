@@ -9,7 +9,7 @@ Component source lives in dedicated folders under `src/components/`. The Astro d
 ## Install
 
 ```sh
-pnpm add @rawr-labs/visual-components
+pnpm add @rawr-labs/liquid-glass
 ```
 
 ## Local development and release preparation
@@ -44,8 +44,8 @@ pnpm publish
 Import the self-registering core entry and the CSS:
 
 ```ts
-import "@rawr-labs/visual-components/liquid-glass";
-import "@rawr-labs/visual-components/styles.css";
+import "@rawr-labs/liquid-glass";
+import "@rawr-labs/liquid-glass/styles.css";
 ```
 
 Use the element as an empty visual layer. Put content in a separate layer above it.
@@ -75,7 +75,7 @@ The Astro wrapper imports the CSS and registers the custom element.
 
 ```astro
 ---
-import { LiquidGlassSurface } from "@rawr-labs/visual-components/astro";
+import { LiquidGlassSurface } from "@rawr-labs/liquid-glass/astro";
 ---
 
 <div class="nav-shell">
@@ -102,7 +102,7 @@ import { LiquidGlassSurface } from "@rawr-labs/visual-components/astro";
 The React wrapper imports the CSS and registers the custom element in an effect.
 
 ```tsx
-import { LiquidGlassSurface } from "@rawr-labs/visual-components/react";
+import { LiquidGlassSurface } from "@rawr-labs/liquid-glass/react";
 
 export function NavGlass() {
 	return (
